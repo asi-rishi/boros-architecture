@@ -73,7 +73,8 @@ boros/
 │       ├── anthropic.py     ← Anthropic API
 │       ├── openai.py        ← OpenAI API
 │       ├── ollama.py        ← Ollama (local models)
-│       └── openai_compat.py ← any OpenAI-compatible endpoint (Together, Groq, Mistral, etc.)
+│       ├── openai_compat.py ← any OpenAI-compatible endpoint (Together, Groq, Mistral, etc.)
+│       └── gemini.py        ← Google Gemini API
 │
 ├── skills/
 │   ├── director-interface/
@@ -276,6 +277,7 @@ class BaseAdapter:
 | `openai` | `providers/openai.py` | OpenAI API. Requires `OPENAI_API_KEY`. |
 | `ollama` | `providers/ollama.py` | Local Ollama server. No API key. `base_url` defaults to `http://localhost:11434`. Tool support depends on model. |
 | `openai_compat` | `providers/openai_compat.py` | Any OpenAI-compatible endpoint (Together, Groq, Mistral, Anyscale, etc.). Requires `base_url` and `api_key_env` (name of the env var holding the key). |
+| `gemini` | `providers/gemini.py` | Google Gemini API. Requires `GEMINI_API_KEY`. |
 
 ### Adding a new provider
 
@@ -317,7 +319,8 @@ Editable by Boros (changes go through Meta-Evaluation review).
     "anthropic": { "provider": "anthropic", "model": "claude-sonnet-4-20250514" },
     "openai": { "provider": "openai", "model": "gpt-4o" },
     "ollama": { "provider": "ollama", "model": "llama3", "base_url": "http://localhost:11434" },
-    "openai_compat": { "provider": "openai_compat", "model": "mistral-7b", "base_url": "https://api.together.xyz/v1", "api_key_env": "TOGETHER_API_KEY" }
+    "openai_compat": { "provider": "openai_compat", "model": "mistral-7b", "base_url": "https://api.together.xyz/v1", "api_key_env": "TOGETHER_API_KEY" },
+    "gemini": { "provider": "gemini", "model": "gemini-1.5-pro" }
   },
   "boot_sequence": [
     "mode-controller",
@@ -583,6 +586,7 @@ ANTHROPIC_API_KEY=
 OPENAI_API_KEY=
 
 # Add keys for any additional providers used in manifest.json
+# GEMINI_API_KEY=
 # TOGETHER_API_KEY=
 # GROQ_API_KEY=
 # MISTRAL_API_KEY=
