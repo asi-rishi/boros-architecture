@@ -33,7 +33,7 @@ cp .env.template .env
 # Edit .env: add your ANTHROPIC_API_KEY and OPENAI_API_KEY
 
 # Install dependencies
-pip install anthropic openai prompt_toolkit python-dotenv
+pip install anthropic openai prompt_toolkit rich python-dotenv
 
 # Review and customize the World Model (scoring categories)
 # Edit boros/world_model.json — starter rubrics are included

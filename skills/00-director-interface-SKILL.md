@@ -244,7 +244,7 @@ Seed state for `state/tui_status.json`: `{"stage": "booting", "step": null, "too
 
 ## Seed Limitations
 
-- TUI uses `prompt_toolkit` for rendering. Falls back to plain `print` if not installed.
+- TUI uses `prompt_toolkit` and `rich` for rendering panels, live logs, formatting and markdown. Falls back to plain `print` if not installed.
 - Log tail is a simple file read of last N lines. No ANSI streaming at seed.
 - Score delta arrows require at least 2 evals to compute. Before that, no arrow shown.
 - `rollback N` command is queued but execution is delegated to Eval Bridge + kernel — Director Interface only writes to `commands/pending.json`.

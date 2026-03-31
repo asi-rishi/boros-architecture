@@ -1,4 +1,4 @@
----
+  ---
 
 ## 1. Boot Sequence
 
@@ -27,7 +27,7 @@ boros>
 
 **What happens mechanically:**
 
-1. `kernel.py` launches Director Interface (skill #0) — sets up prompt_toolkit terminal
+1. `kernel.py` launches Director Interface (skill #0) — sets up prompt_toolkit and rich terminal
 2. Director Interface starts the kernel in a background thread
 3. Kernel detects first boot (no `session/current_cycle.json`): creates all directories, writes seed state files, derives `evals/categories.json` from `world_model.json`
 4. Kernel loads boot skills 1-10 in strict order, running `health_check()` on each

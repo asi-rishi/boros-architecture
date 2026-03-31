@@ -677,7 +677,7 @@ Called at boot during skill loading. Must return without error if the skill is o
 **Dependencies:** None
 **Purpose:** Interactive terminal UI. Wraps the kernel in a background thread. Director types commands inline.
 
-**Implementation:** Built with `prompt_toolkit`. The evolution loop runs in a background thread; Director input runs in the foreground. Ctrl+C sets a `pause_requested` flag — the loop stops at the next cycle boundary.
+**Implementation:** Built with `prompt_toolkit` and `rich`. The evolution loop runs in a background thread; Director input runs in the foreground. Ctrl+C sets a `pause_requested` flag — the loop stops at the next cycle boundary.
 
 This skill is NOT LLM-facing. No SKILL.md is needed. It is pure terminal infrastructure.
 
@@ -1735,7 +1735,7 @@ Stored in `tasks/learning/`.
 
 ### Implementation
 
-- Built with `prompt_toolkit`
+- Built with `prompt_toolkit` and `rich` for a highly polished, Claude Code-like experience
 - Entry point: `python kernel.py` launches Director Interface first
 - Director Interface starts the kernel in a background thread
 - Foreground: readline input for Director commands
@@ -1925,7 +1925,7 @@ Each SKILL.md follows the seed skill pattern: purpose, role in loop, functions w
 
 ### Phase 5 — Director Interface
 
-Implement skill #0: `prompt_toolkit` terminal UI, background thread for the evolution loop, foreground readline for Director commands, command parsing and dispatch, `logs/cycles.log` streaming, Ctrl+C handling.
+Implement skill #0: `prompt_toolkit` and `rich` terminal UI, background thread for the evolution loop, foreground readline for Director commands, command parsing and dispatch, `logs/cycles.log` streaming, Ctrl+C handling.
 
 **Acceptance:** `python boros/kernel.py` launches terminal, shows boot output for 10 skills, accepts `boros status`.
 
@@ -1964,7 +1964,7 @@ First-boot detection (absence of `session/current_cycle.json`). Create all direc
 
 | Skill | Complexity | Notes |
 |-------|-----------|-------|
-| Director Interface | High | prompt_toolkit, threading, not LLM-facing |
+| Director Interface | High | prompt_toolkit, rich, threading, not LLM-facing |
 | Loop Orchestrator | High | Drives the entire loop, conversation lifecycle, system prompt assembly |
 | Skill Router | Medium | Tool visibility per stage, budget tracking |
 | Reflection | Medium | Analysis + hypothesis writing + hard gate |

@@ -16,6 +16,8 @@ BOROS — Build Order
 - `boros/adapters/providers/openai.py` — OpenAI API adapter
 - `boros/adapters/providers/ollama.py` — Ollama (local models) adapter
 - `boros/adapters/providers/openai_compat.py` — any OpenAI-compatible endpoint adapter
+- `boros/adapters/providers/gemini.py` — Google Gemini API adapter
+- `boros/eval-generator/eval_generator.py` — a temporary stub script that writes `shared/.ready` and sleeps (prevents Phase 5 deadlock)
 - `boros/manifest.json` — exact content from BOROS.md Section 5
 - `boros/config.json` — exact content from BOROS.md Section 6
 - `boros/world_model.json` — full 10-category rubrics from BOROS.md Section 7, pre-filled (Eval Generator needs rubrics to score on cycle 1)
@@ -158,7 +160,7 @@ print('review_history OK')
 
 **Implement skill #0 (NOT LLM-facing):**
 
-- `prompt_toolkit` based terminal UI
+- `prompt_toolkit` and `rich` based terminal UI (panels, spinners, markdown)
 - Background thread for evolution loop
 - Foreground readline for Director commands
 - Command parsing: `boros {command} {args}`

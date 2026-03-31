@@ -30,7 +30,7 @@ Haiku is sufficient for bootstrap — no score data exists yet, proposals are hy
 ```bash
 cp .env.template .env
 # Add ANTHROPIC_API_KEY and OPENAI_API_KEY to .env
-pip install anthropic openai prompt_toolkit python-dotenv
+pip install anthropic openai prompt_toolkit rich python-dotenv
 python boros/kernel.py
 ```
 
@@ -71,7 +71,7 @@ The LLM controls stage transitions by calling Loop Orchestrator tools. When `loo
 19 skills in two categories:
 
 **Boot Skills** (strict load order, health_check on each — failure halts boot):
-1. Director Interface (#0, pre-boot) — terminal UI (prompt_toolkit), NOT health-checked
+1. Director Interface (#0, pre-boot) — terminal UI (prompt_toolkit + rich), NOT health-checked
 2. Mode Controller (#1)
 3. Temporal Consciousness (#2)
 4. Identity (#3)

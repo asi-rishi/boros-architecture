@@ -8,7 +8,7 @@
 **Purpose:** Terminal UI for the Director. Wraps the kernel in a background thread.
 **Dependencies:** None (loads before everything)
 
-**Implementation:** `prompt_toolkit` based terminal. Kernel runs in background thread. Foreground: readline input for Director commands. Background: streams `logs/cycles.log` to terminal. Ctrl+C sets `pause_requested` flag, loop stops at cycle boundary.
+**Implementation:** `prompt_toolkit` and `rich` based terminal (providing polished panels and markdown). Kernel runs in background thread. Foreground: readline input for Director commands. Background: streams `logs/cycles.log` to terminal. Ctrl+C sets `pause_requested` flag, loop stops at cycle boundary.
 
 **Functions:**
 
