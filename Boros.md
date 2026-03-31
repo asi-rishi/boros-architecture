@@ -12,6 +12,7 @@ BOROS — Complete Technical Specification
 2. [Core Objective](#2-core-objective)
 3. [Folder Structure](#3-folder-structure)
 4. [The Kernel](#4-the-kernel)
+4b. [Adapters — Provider-Agnostic LLM Interface](#4b-adapters--provider-agnostic-llm-interface)
 5. [Manifest Schema](#5-manifest-schema)
 6. [Config Schema](#6-config-schema)
 7. [World Model Schema](#7-world-model-schema)
@@ -30,7 +31,7 @@ BOROS — Complete Technical Specification
 20. [Director CLI Reference](#20-director-cli-reference)
 21. [Session vs Memory Lifecycle](#21-session-vs-memory-lifecycle)
 22. [Runtime Model](#22-runtime-model)
-23. [The 12 Scoring Categories](#23-the-12-scoring-categories)
+23. [The 10 Scoring Categories](#23-the-10-scoring-categories)
 24. [Access Control](#24-access-control)
 25. [Build Order](#25-build-order)
 26. [Seed Skill Index](#26-seed-skill-index)
@@ -46,11 +47,11 @@ Boros is a self-improving AI system. It starts as a minimal working version and 
 
 ## 2. Core Objective
 
-Boros looks at its scores across 12 categories, identifies what it is worst at, edits one of its own instruction files to fix the problem, tests whether the edit helped, and keeps or reverts. It does this on a loop, every cycle. Cycle after cycle, the scores go up. The ceiling is whatever the underlying language model is capable of — that ceiling state is called **Prime Boros**.
+Boros looks at its scores across 10 categories, identifies what it is worst at, edits one of its own instruction files to fix the problem, tests whether the edit helped, and keeps or reverts. It does this on a loop, every cycle. Cycle after cycle, the scores go up. The ceiling is whatever the underlying language model is capable of — that ceiling state is called **Prime Boros**.
 
 Once Prime Boros is reached, the system can be forked into specialized versions by adding domain-specific scoring pressure (Boros-SWE, Boros-Legal, Boros-Finance, Boros-Ops). All of that comes from changing what is being scored — not from rewriting the system.
 
-The Director's only real control surface is the **World Model** — the 12 categories and their scoring criteria. Change those, and Boros changes what it optimizes toward.
+The Director's only real control surface is the **World Model** — the 10 categories and their scoring criteria. Change those, and Boros changes what it optimizes toward.
 
 ---
 
@@ -66,9 +67,13 @@ boros/
 ├── world_model.json
 │
 ├── adapters/
-│   ├── __init__.py
-│   ├── anthropic_adapter.py
-│   └── openai_adapter.py
+│   ├── __init__.py          ← factory: load_adapter(provider, config) → BaseAdapter
+│   ├── base_adapter.py      ← abstract interface all providers must implement
+│   └── providers/
+│       ├── anthropic.py     ← Anthropic API
+│       ├── openai.py        ← OpenAI API
+│       ├── ollama.py        ← Ollama (local models)
+│       └── openai_compat.py ← any OpenAI-compatible endpoint (Together, Groq, Mistral, etc.)
 │
 ├── skills/
 │   ├── director-interface/
@@ -190,8 +195,8 @@ skill-name/
 | Attribute | Type | Purpose |
 |-----------|------|---------|
 | `kernel.registry` | dict | function_name → callable |
-| `kernel.primary_llm` | Anthropic adapter | Claude — primary substrate |
-| `kernel.meta_eval_llm` | OpenAI adapter | GPT-4o — meta-evaluation |
+| `kernel.primary_llm` | BaseAdapter instance | Primary substrate — provider set in manifest |
+| `kernel.meta_eval_llm` | BaseAdapter instance | Meta-evaluation — provider set in manifest |
 | `kernel.clock` | callable | Returns UTC timestamp |
 | `kernel.manifest` | dict | Loaded manifest |
 | `kernel.config` | dict | Loaded config |
@@ -223,6 +228,65 @@ When the LLM returns a tool-use block, the kernel looks up the function name in 
 
 ---
 
+## 4b. Adapters — Provider-Agnostic LLM Interface
+
+All LLM calls go through the adapter layer. The kernel never calls an LLM API directly. Any role (primary substrate, meta-evaluation, eval generator) can use any provider.
+
+### BaseAdapter interface
+
+Every adapter must implement this interface:
+
+```python
+class BaseAdapter:
+    def complete(self, messages: list, tools: list = None, system: str = None) -> dict:
+        """Send messages, return structured response with content blocks."""
+        raise NotImplementedError
+
+    def stream(self, messages: list, tools: list = None, system: str = None):
+        """Optional streaming. Raise NotImplementedError to disable."""
+        raise NotImplementedError
+
+    @property
+    def supports_tools(self) -> bool:
+        """Return False for providers that don't support function calling."""
+        return True
+```
+
+`complete()` always returns a normalized dict:
+```json
+{
+  "content": [
+    {"type": "text", "text": "..."},
+    {"type": "tool_use", "name": "function_name", "id": "...", "input": {...}}
+  ],
+  "stop_reason": "tool_use | end_turn | max_tokens",
+  "usage": {"input_tokens": 0, "output_tokens": 0}
+}
+```
+
+### Factory
+
+`adapters/__init__.py` exports `load_adapter(role_config: dict) → BaseAdapter`. It reads the `provider` key from the manifest role config and loads the corresponding class from `adapters/providers/{provider}.py`. Unknown providers raise a clear error at boot, not at runtime.
+
+### Built-in providers
+
+| Provider key | File | Notes |
+|---|---|---|
+| `anthropic` | `providers/anthropic.py` | Anthropic API. Requires `ANTHROPIC_API_KEY`. |
+| `openai` | `providers/openai.py` | OpenAI API. Requires `OPENAI_API_KEY`. |
+| `ollama` | `providers/ollama.py` | Local Ollama server. No API key. `base_url` defaults to `http://localhost:11434`. Tool support depends on model. |
+| `openai_compat` | `providers/openai_compat.py` | Any OpenAI-compatible endpoint (Together, Groq, Mistral, Anyscale, etc.). Requires `base_url` and `api_key_env` (name of the env var holding the key). |
+
+### Adding a new provider
+
+Drop a file at `adapters/providers/{name}.py` that subclasses `BaseAdapter`. Set `"provider": "{name}"` in the manifest. The factory loads it automatically — no kernel changes required.
+
+### Provider constraints
+
+If `supports_tools` returns `False` (e.g., a model that doesn't support function calling), the kernel falls back to XML-tag parsing for tool dispatch. This fallback is implemented in the kernel's dispatch loop, not in the adapter.
+
+---
+
 ## 5. Manifest Schema
 
 **File:** `boros/manifest.json`
@@ -247,6 +311,13 @@ Editable by Boros (changes go through Meta-Evaluation review).
       "provider": "openai",
       "model": "gpt-4o"
     }
+  },
+  "_llm_provider_examples": {
+    "_note": "This field is documentation only — delete before use. Any role (primary, meta_eval, eval_generator) accepts any provider below.",
+    "anthropic": { "provider": "anthropic", "model": "claude-sonnet-4-20250514" },
+    "openai": { "provider": "openai", "model": "gpt-4o" },
+    "ollama": { "provider": "ollama", "model": "llama3", "base_url": "http://localhost:11434" },
+    "openai_compat": { "provider": "openai_compat", "model": "mistral-7b", "base_url": "https://api.together.xyz/v1", "api_key_env": "TOGETHER_API_KEY" }
   },
   "boot_sequence": [
     "mode-controller",
@@ -507,11 +578,17 @@ Director-only. Boros cannot read or modify this file.
 **File:** `boros/.env`
 
 ```
+# Required for default config (Anthropic primary + OpenAI meta-eval)
 ANTHROPIC_API_KEY=
 OPENAI_API_KEY=
+
+# Add keys for any additional providers used in manifest.json
+# TOGETHER_API_KEY=
+# GROQ_API_KEY=
+# MISTRAL_API_KEY=
 ```
 
-Read at boot via `dotenv`. Both keys are mandatory. Anthropic key drives the primary substrate; OpenAI key drives Meta-Evaluation and Eval Generator. API keys are from `console.anthropic.com` — separate from any Claude subscription.
+Read at boot via `dotenv`. The kernel loads only the keys required by the providers named in `manifest.json`. If a provider is configured but its key is missing, the kernel halts at boot with a clear error. Ollama and other local providers require no API key.
 
 ---
 
@@ -539,7 +616,7 @@ Each category entry:
 }
 ```
 
-Ships pre-filled with all 12 categories and rubrics. The Eval Generator needs rubrics to score on cycle 1 — empty rubrics cause EVAL to fail immediately.
+Ships pre-filled with all 10 categories and rubrics. The Eval Generator needs rubrics to score on cycle 1 — empty rubrics cause EVAL to fail immediately.
 
 **Changing a category definition resets its high-water mark.**
 
@@ -1756,25 +1833,25 @@ A single bad cycle never stops evolution.
 
 ---
 
-## 23. The 12 Scoring Categories
+## 23. The 10 Scoring Categories
 
 Boros can see: category names, descriptions, final state, anchors.
 Boros cannot see: rubrics (level descriptions), weights, test questions, which responses scored well.
 
-| # | Category | Description | Final State | Anchors |
-|---|----------|-------------|-------------|---------|
-| 1 | Instruction Following | Flawless execution of precise instructions. No drift. Handles conflicting constraints. | Senior executive assistant who never misses a detail. | Completeness, accuracy, edge case handling, following constraints exactly |
-| 2 | Reasoning Depth | Complex logic chains, contradiction detection, edge case awareness, coherent multi-step thinking. | Senior FAANG staff engineer debugging distributed systems. | Correctness, chain quality, edge cases, ambiguity handling, recovery from wrong approaches |
-| 3 | Memory Coherence | Perfect recall across hundreds of sessions. Automatic contradiction detection. Consistency over time. | Senior executive assistant of 15 years. | Precision and recall, contradiction detection, cross-session consistency, handling gaps gracefully |
-| 4 | Adaptability | Instant orientation in new situations. Quick recovery. Comfort with ambiguity. Cross-domain transfer. | Special forces operator in unfamiliar terrain. | Orientation time, first response under uncertainty, recovery speed, handling changed constraints |
-| 5 | Metacognition | Real-time assessment of own reasoning quality. Well-calibrated confidence. Catches own errors. | Professional poker player's hand strength assessment. | Calibration accuracy, uncertainty flagging, mid-reasoning error catching, knowing own limits |
-| 6 | Temporal Awareness | Rich sense of time. Accurate estimation. Appropriate pacing. Urgency detection. | Seasoned project manager — estimates within 15%, responds to urgency without panic. | Estimation accuracy, urgency response, contextual time use, awareness of own development stage |
-| 7 | Learning Velocity | Learns from failure on first or second attempt. Automatically applies past experience. Cross-domain transfer. | Top-tier second-year PhD student. | Improvement rate, experience retrieval, cross-domain application, repeat failure rate |
-| 8 | Goal Coherence | Perfect alignment between actions and objectives. Detects own drift. Manages competing priorities. | Founder CEO navigating pivots. | Action-objective alignment, drift detection speed, priority management, stability vs flexibility |
-| 9 | Communication Quality | Clear, precise, adapted to audience. No unintentional ambiguity. | Best technical writer. Great teacher who adjusts in real time. | Clarity, precision, audience adaptation, conciseness |
-| 10 | Integration | All skills working as unified whole. Emergent capabilities from combinations. Whole greater than sum. | World-class jazz ensemble. | Cross-skill coordination, emergent capabilities, graceful degradation when parts fail |
-| 11 | Research Quality | Efficient knowledge finding. Credibility evaluation. Synthesis from multiple sources. | Senior analyst at a top consulting firm. | Source relevance, credibility evaluation, synthesis quality, application effectiveness |
-| 12 | Task Execution | Takes ambiguous tasks and delivers polished results. Clarifies requirements. Plans efficiently. | Senior consultant given a vague brief. | Requirement handling, plan quality, execution quality, delivery reliability, robustness |
+Composite denominator: **10.6** (three categories at weight 1.2, seven at weight 1.0).
+
+| # | Key | Category | Weight | Description | Final State |
+|---|-----|----------|--------|-------------|-------------|
+| 1 | `self_model_fidelity` | Self-Model Fidelity | 1.2 | Accurately annotates certainty, inference, and uncertainty inline — stated confidence matches actual output quality. No overclaiming, no underclaiming. | A master surgeon narrating their own procedure — calling out exactly what they see clearly, what they infer, and where they need to be careful. |
+| 2 | `epistemic_calibration` | Epistemic Calibration | 1.2 | Propagates uncertainty through multi-step reasoning without collapsing it. Distinguishes known, inferred, speculative. Names the shape of its own ignorance. | A top-tier analyst who says exactly what the data supports, flags where the data is thin, and never writes a confident conclusion from an uncertain chain. |
+| 3 | `reasoning_architecture` | Reasoning Architecture | 1.2 | Selects the right mental model per problem — decompose, analogy, backwards, simulate. Reasoning is transparent and recoverable without full restart. | A polymath who instinctively reaches for the right tool. A chess player who reads the position and selects the right plan rather than the memorized one. |
+| 4 | `complexity_navigation` | Complexity Navigation | 1.0 | Holds multiple constraints simultaneously without dropping any. Handles compound ambiguity and partial information without premature resolution. | A senior air traffic controller managing 40 aircraft — tracking everything, prioritizing correctly, never losing a thread. |
+| 5 | `domain_snap` | Domain Snap | 1.0 | Instant, accurate orientation in a new domain. Identifies what matters, what transfers, what is domain-specific, within the first response. | A brilliant generalist dropped into a new field who gets the lay of the land in one conversation without faking expertise they don't have. |
+| 6 | `hypothesis_engine` | Hypothesis Engine | 1.0 | Generates multiple competing hypotheses ranked by likelihood. Updates beliefs correctly on new evidence. Knows when to commit and when to stay open. | A master diagnostician — not just the first plausible answer, but the full differential, pruned correctly as evidence arrives. |
+| 7 | `generative_depth` | Generative Depth | 1.0 | Produces outputs that are genuinely novel, internally structured, and non-obvious — not just recombination of surface patterns. | A senior creative director who consistently produces work that surprises even experts in the domain. |
+| 8 | `execution_reliability` | Execution Reliability | 1.0 | Delivers complete, correct, directly usable outputs. Follows all constraints exactly. No drift between stated plan and actual execution. | A senior engineer whose code compiles, whose documents are complete, whose outputs need no fixing before use. |
+| 9 | `adversarial_robustness` | Adversarial Robustness | 1.0 | Maintains correct reasoning under pressure, contradiction, leading questions, and social engineering. Detects manipulation attempts. Does not capitulate without valid logical reason. | A seasoned expert witness who stays accurate under cross-examination — doesn't wilt, doesn't overcorrect, doesn't get baited. |
+| 10 | `coherence_under_load` | Coherence Under Load | 1.0 | Maintains internal consistency and goal alignment across long, complex, multi-part tasks. Does not lose thread, contradict earlier statements, or drift from original objective. | A novelist who keeps 40 characters, 3 plotlines, and 300 pages of continuity in their head — without notes. |
 
 ---
 
@@ -1808,13 +1885,13 @@ Build in this exact sequence. Each phase must pass its acceptance criteria befor
 
 Create the kernel, adapters, and three core config files:
 - `kernel.py` (~50 lines)
-- `adapters/__init__.py`, `adapters/anthropic_adapter.py`, `adapters/openai_adapter.py`
+- `adapters/__init__.py` (factory), `adapters/base_adapter.py` (abstract interface), `adapters/providers/anthropic.py`, `adapters/providers/openai.py`, `adapters/providers/ollama.py`, `adapters/providers/openai_compat.py`
 - `manifest.json` — exact content from Section 5
 - `config.json` — exact content from Section 6
-- `world_model.json` — full 12-category rubrics from Section 7, pre-filled
+- `world_model.json` — full 10-category rubrics from Section 7, pre-filled
 - `.env.template`
 
-**Acceptance:** Both adapters import cleanly. Kernel reads manifest. Manifest has 10-entry boot sequence. `world_model.json` has 12 categories.
+**Acceptance:** All four provider adapters import cleanly. `load_adapter({"provider": "anthropic", ...})` returns a `BaseAdapter` instance. Kernel reads manifest. Manifest has 10-entry boot sequence. `world_model.json` has 10 categories.
 
 ### Phase 2 — Skill Scaffold
 
@@ -1862,7 +1939,7 @@ Wire all components together: Loop Orchestrator actually runs cycles, Context Or
 
 ### Phase 8 — Seed State Initialization
 
-First-boot detection (absence of `session/current_cycle.json`). Create all directories. Write all seed state files. Derive `evals/categories.json` from `world_model.json`. Initialize `high_water_marks.json` (all 12 at 0.0), `loop_state.json` (cycle 0), `identity.json` (seed content), `commands/pending.json` (`{"pending": []}`).
+First-boot detection (absence of `session/current_cycle.json`). Create all directories. Write all seed state files. Derive `evals/categories.json` from `world_model.json`. Initialize `high_water_marks.json` (all 10 at 0.0), `loop_state.json` (cycle 0), `identity.json` (seed content), `commands/pending.json` (`{"pending": []}`).
 
 **Acceptance:** Fresh clone → set API keys → `python boros/kernel.py` → first boot detected, all directories created, cycle 1 runs without crashing.
 
@@ -1917,8 +1994,12 @@ boros/
 │
 ├── adapters/
 │   ├── __init__.py
-│   ├── anthropic_adapter.py
-│   └── openai_adapter.py
+│   ├── base_adapter.py
+│   └── providers/
+│       ├── anthropic.py
+│       ├── openai.py
+│       ├── ollama.py
+│       └── openai_compat.py
 │
 ├── skills/
 │   │
