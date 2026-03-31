@@ -1,0 +1,222 @@
+{
+  "version": "1.0.0",
+  "description": "Maps each skill to the world_model categories it most plausibly affects. Used by Reflection to guide hypothesis targeting (which skill to change to move a target category) and by Meta-Evolution to check for expected vs. unexpected cross-category impact after backfill.",
+  "usage": {
+    "in_reflection": "When targeting a category, check primary skills first. If changes to primary skills have been repeatedly rejected or have plateau'd, move to secondary skills.",
+    "in_meta_evolution": "After backfill, compare actual delta categories against this map. If an applied change moved a non-listed category significantly, write an experience record — the map may need updating.",
+    "update_policy": "Boros may propose changes to this file via Meta-Evolution if evolution records reveal that actual cross-category impacts differ from this map."
+  },
+  "map": {
+    "reasoning": {
+      "skill_id": 13,
+      "type": "demand",
+      "primary": [
+        "reasoning_architecture",
+        "hypothesis_engine",
+        "epistemic_calibration"
+      ],
+      "secondary": [
+        "generative_depth",
+        "coherence_under_load"
+      ],
+      "rationale": "Reasoning skill instructions directly shape problem-solving strategy, hypothesis generation, and how uncertainty propagates through chains. The highest-leverage skill in the map — changes here affect 5 categories.",
+      "notes": "Changes to reason_decompose most affect reasoning_architecture. Changes to reason_evaluate_options most affect hypothesis_engine. Changes to uncertainty handling rules most affect epistemic_calibration."
+    },
+    "reflection": {
+      "skill_id": 7,
+      "type": "boot",
+      "primary": [
+        "hypothesis_engine",
+        "self_model_fidelity"
+      ],
+      "secondary": [
+        "epistemic_calibration",
+        "reasoning_architecture"
+      ],
+      "rationale": "Reflection writes the cycle hypothesis — hypothesis quality directly affects how well Boros generates and eliminates competing explanations. Reflection outputs also exhibit self-annotation patterns that the eval reads for self_model_fidelity.",
+      "notes": "Changes to reflection_write_hypothesis instructions most affect hypothesis_engine. Changes to analysis formatting and confidence calibration rules affect self_model_fidelity."
+    },
+    "identity": {
+      "skill_id": 3,
+      "type": "boot",
+      "primary": [
+        "self_model_fidelity",
+        "adversarial_robustness"
+      ],
+      "secondary": [],
+      "rationale": "Identity defines how Boros describes itself and its epistemic status. Strong identity anchoring reduces susceptibility to social pressure and false-authority manipulation (adversarial_robustness).",
+      "notes": "Changes to self-description instructions affect self_model_fidelity. Changes to values and stability rules affect adversarial_robustness."
+    },
+    "memory": {
+      "skill_id": 4,
+      "type": "boot",
+      "primary": [
+        "complexity_navigation",
+        "domain_snap"
+      ],
+      "secondary": [
+        "coherence_under_load",
+        "hypothesis_engine"
+      ],
+      "rationale": "Memory retrieval quality determines what context is available. Better retrieval of relevant prior records improves how well Boros navigates complex new problems and snaps to new domains by surfacing analogous cases.",
+      "notes": "Changes to retrieval prioritization affect complexity_navigation (right context loaded) and domain_snap (analogous domains surfaced). Changes to record structure affect coherence across cycles."
+    },
+    "context-orchestration": {
+      "skill_id": 6,
+      "type": "boot",
+      "primary": [
+        "complexity_navigation",
+        "coherence_under_load"
+      ],
+      "secondary": [
+        "execution_reliability",
+        "domain_snap"
+      ],
+      "rationale": "What gets loaded into context determines what Boros can reason about. Better context loading reduces information drop under complexity (complexity_navigation) and provides the full constraint set needed for coherent output (coherence_under_load).",
+      "notes": "Changes to budget allocation affect what context is available. Changes to content serialization format affect how well Boros can parse and use the loaded information."
+    },
+    "attention": {
+      "skill_id": 14,
+      "type": "demand",
+      "primary": [
+        "complexity_navigation",
+        "coherence_under_load"
+      ],
+      "secondary": [
+        "execution_reliability"
+      ],
+      "rationale": "Attention shapes what Boros focuses on within a response. Better focus reduces element dropout under complexity and helps maintain constraint tracking throughout a long response.",
+      "notes": "Changes to attention_prioritize instructions affect complexity_navigation. Changes to flagging rules affect whether all opened threads get closed (coherence_under_load, execution_reliability)."
+    },
+    "research": {
+      "skill_id": 17,
+      "type": "demand",
+      "primary": [
+        "generative_depth",
+        "hypothesis_engine"
+      ],
+      "secondary": [
+        "domain_snap",
+        "epistemic_calibration"
+      ],
+      "rationale": "Research quality determines whether Boros surfaces genuinely novel connections (generative_depth) and whether external evidence is properly integrated into hypothesis testing (hypothesis_engine).",
+      "notes": "Changes to synthesis instructions affect generative_depth. Changes to source evaluation affect epistemic_calibration (how uncertainty from weak sources propagates)."
+    },
+    "communication": {
+      "skill_id": 16,
+      "type": "demand",
+      "primary": [
+        "execution_reliability",
+        "coherence_under_load"
+      ],
+      "secondary": [
+        "domain_snap"
+      ],
+      "rationale": "Communication skill instructions shape how responses are delivered — completeness, consistency, and format. Changes here affect whether outputs are complete and coherent.",
+      "notes": "Changes to completion and delivery rules affect execution_reliability. Changes to constraint-satisfaction formatting affect coherence_under_load."
+    },
+    "mission": {
+      "skill_id": 12,
+      "type": "demand",
+      "primary": [
+        "execution_reliability",
+        "adversarial_robustness"
+      ],
+      "secondary": [
+        "coherence_under_load"
+      ],
+      "rationale": "Mission anchors Boros to its goals, which stabilizes behavior under adversarial pressure and directs effort toward task completion.",
+      "notes": "Weak mission state makes Boros easier to manipulate away from its objectives (adversarial_robustness). Clear goal framing improves task completion (execution_reliability)."
+    },
+    "tool-use": {
+      "skill_id": 15,
+      "type": "demand",
+      "primary": [
+        "execution_reliability"
+      ],
+      "secondary": [],
+      "rationale": "Tool Use enables Boros to execute work tasks. Better tool-use instructions reduce partial or failed executions.",
+      "notes": "Low direct leverage on cognitive categories. Changes here primarily affect execution_reliability in work mode."
+    },
+    "loop-orchestrator": {
+      "skill_id": 10,
+      "type": "boot",
+      "primary": [
+        "execution_reliability"
+      ],
+      "secondary": [],
+      "rationale": "Infrastructure skill. Stage sequencing and cycle management affect whether cycles complete cleanly.",
+      "notes": "Treat as low-leverage for cognitive category evolution. Changes here risk breaking boot sequence — require extra care."
+    },
+    "meta-evolution": {
+      "skill_id": 8,
+      "type": "boot",
+      "primary": [
+        "execution_reliability",
+        "reasoning_architecture"
+      ],
+      "secondary": [
+        "hypothesis_engine"
+      ],
+      "rationale": "Meta-Evolution instructions shape how Boros translates hypotheses into SKILL.md changes. Better proposal process = more reliable change execution and more targeted hypothesis translation.",
+      "notes": "Changes to evolve_propose instructions affect execution_reliability of the evolution process itself. Changes to proposal reasoning rules affect reasoning_architecture (strategy selection in change design)."
+    },
+    "skill-forge": {
+      "skill_id": 11,
+      "type": "demand",
+      "primary": [
+        "execution_reliability"
+      ],
+      "secondary": [],
+      "rationale": "Infrastructure skill. Snapshot, validate, and rollback operations affect whether changes are reliably applied and reverted.",
+      "notes": "Low direct leverage on cognitive categories. Infrastructure — change with caution."
+    },
+    "temporal-consciousness": {
+      "skill_id": 2,
+      "type": "boot",
+      "primary": [
+        "execution_reliability"
+      ],
+      "secondary": [],
+      "rationale": "Time awareness affects whether Boros respects cycle budgets and timing constraints.",
+      "notes": "Infrastructure. Low leverage on cognitive categories."
+    },
+    "mode-controller": {
+      "skill_id": 1,
+      "type": "boot",
+      "primary": [],
+      "secondary": [],
+      "rationale": "Pure infrastructure. Mode reading/setting does not affect cognitive output quality.",
+      "notes": "Do not target for cognitive category evolution."
+    },
+    "skill-router": {
+      "skill_id": 5,
+      "type": "boot",
+      "primary": [],
+      "secondary": [
+        "execution_reliability"
+      ],
+      "rationale": "Infrastructure. Tool visibility affects what Boros can call per stage, which indirectly affects execution.",
+      "notes": "Low-leverage for cognitive evolution."
+    },
+    "eval-bridge": {
+      "skill_id": 18,
+      "type": "demand",
+      "primary": [],
+      "secondary": [],
+      "rationale": "Pure infrastructure for score communication. Does not affect cognitive output quality.",
+      "notes": "Do not target for cognitive category evolution."
+    },
+    "director-interface": {
+      "skill_id": 0,
+      "type": "boot_preboot",
+      "primary": [],
+      "secondary": [],
+      "rationale": "Terminal UI infrastructure. Does not affect cognitive output quality.",
+      "notes": "Do not target for cognitive category evolution."
+    }
+  },
+  "high_leverage_skills": ["reasoning", "reflection", "research", "attention"],
+  "infrastructure_skills": ["loop-orchestrator", "skill-forge", "tool-use", "temporal-consciousness", "mode-controller", "skill-router", "eval-bridge", "director-interface"],
+  "note": "Infrastructure skills are excluded from evolution targeting by default. To change this, a Director must explicitly enable infrastructure evolution in config.json."
+}
