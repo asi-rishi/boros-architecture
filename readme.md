@@ -165,9 +165,9 @@ Example: `boros inject "your last 3 proposals to reasoning/SKILL.md all failed â
 | 04  | Memory                 | Boot     | Autonomous Tiered SQlite & Vector DB      |
 | 05  | Skill Router           | Boot     | Tooling manifest & API injection          |
 | 06  | Context Orchestration  | Boot     | Lean context loading & active whispering  |
-| 07  | Reflection             | Hybrid   | Log ingestion, error traces, & hypothesis |
-| 08  | Meta-Evolution         | Demand   | Raw SWE patch proposals & code authoring  |
-| 09  | Meta-Evaluation        | Demand   | Independent code review board via GPT-4o  |
+| 07  | Reflection             | Boot     | Log ingestion, error traces, & hypothesis |
+| 08  | Meta-Evolution         | Boot     | Raw SWE patch proposals & code authoring  |
+| 09  | Meta-Evaluation        | Boot     | Independent code review board via GPT-4o  |
 | 10  | Loop Orchestrator      | Boot     | Drives the primary lifecycle              |
 | 11  | Skill Forge            | Demand   | Code snapshot, compile, isolate, rollback |
 | 12  | Mission Control        | Demand   | Independent task queueing and execution   |

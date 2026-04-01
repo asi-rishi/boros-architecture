@@ -58,8 +58,8 @@ python -c "
 import os
 skills = ['director-interface','mode-controller','temporal-consciousness','identity','memory',
           'skill-router','context-orchestration','reflection','meta-evolution','meta-evaluation',
-          'loop-orchestrator','skill-forge','mission','reasoning','attention','tool-use',
-          'communication','research','eval-bridge']
+          'loop-orchestrator','skill-forge','mission-control','reasoning','scratchpad','tool-use',
+          'communication','web-research','eval-bridge']
 for s in skills:
     assert os.path.isdir(f'boros/skills/{s}'), f'Missing {s}'
     assert os.path.isfile(f'boros/skills/{s}/skill.json'), f'Missing {s}/skill.json'
@@ -71,12 +71,12 @@ print(f'All {len(skills)} skill directories OK')
 
 ## Phase 3 — Critical Seed Skills
 
-**Copy from SEED-SKILLS.md verbatim:**
+**Copy from `Universal-Skills.md` verbatim:**
 
-- Section 1 → `boros/skills/memory/` (all functions, SKILL.md, skill.json)
-- Section 2 → `boros/skills/meta-evolution/` (all functions, SKILL.md, skill.json)
-- Section 3 → `boros/skills/meta-evaluation/` (all functions, SKILL.md, skill.json, `_internal/prompt_builder.py`)
-- Section 4 → `boros/skills/context-orchestration/` (all functions, SKILL.md, skill.json)
+- §04-memory → `boros/skills/memory/` (all functions, SKILL.md, skill.json)
+- §08-meta-evolution → `boros/skills/meta-evolution/` (all functions, SKILL.md, skill.json)
+- §09-meta-evaluation → `boros/skills/meta-evaluation/` (all functions, SKILL.md, skill.json, `_internal/prompt_builder.py`)
+- §06-context-orchestration → `boros/skills/context-orchestration/` (all functions, SKILL.md, skill.json)
 
 **CRITICAL:** Memory functions use `boros/memory/` (top-level), NOT `boros/skills/memory/state/`. All `_get_root()` helpers use `kernel.boros_root` if available, else `Path("boros")`.
 
@@ -109,13 +109,10 @@ boros/memory/
 
 ```bash
 python -c "
-from boros.skills.memory.functions import memory_stats, memory_read, memory_write
-r = memory_stats({})
+from boros.skills.memory.functions import memory_page_in, memory_search_sql
+r = memory_search_sql({'sql_query': 'SELECT 1'}, None)
 assert r['status'] == 'ok', r
-print('memory_stats OK')
-r = memory_read({})
-assert r['status'] == 'ok', r
-print('memory_read OK')
+print('memory_search_sql OK')
 from boros.skills.meta_evolution.functions import evolve_history
 r = evolve_history({})
 assert r['status'] == 'ok', r
@@ -133,7 +130,7 @@ print('review_history OK')
 
 ## Phase 4 — Remaining 15 Skill Implementations
 
-**Generate from SKILLS-REFERENCE.md.** Priority order:
+**Generate from `Universal-Skills.md`.** Priority order:
 
 1. Loop Orchestrator (drives everything)
 2. Mode Controller (simplest, validates mode works)
@@ -143,7 +140,7 @@ print('review_history OK')
 6. Identity
 7. Skill Forge (needed for evolution)
 8. Eval Bridge (needed for scoring)
-9. Mission, Reasoning, Attention, Tool Use, Communication, Research
+9. Mission Control, Reasoning, Scratchpad, Tool Use, Communication, Web Research
 
 **For each skill:**
 

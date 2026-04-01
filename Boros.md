@@ -1954,10 +1954,10 @@ First-boot detection (absence of `session/current_cycle.json`). Create all direc
 
 | Skill | Source | Functions |
 |-------|--------|-----------|
-| Memory | Section 1 | `memory_read`, `memory_write`, `memory_update`, `memory_stats` |
-| Meta-Evolution | Section 2 | `evolve_orient`, `evolve_set_target`, `evolve_propose`, `evolve_apply`, `evolve_rollback`, `evolve_create_skill`, `evolve_modify_loop`, `evolve_history` |
-| Meta-Evaluation | Section 3 | `review_proposal`, `review_modify`, `review_criteria_update`, `review_history` + `_internal/prompt_builder.py` |
-| Context Orchestration | Section 4 | `context_load`, `context_get_manifest` |
+| Memory | §04-memory | `memory_page_in`, `memory_page_out`, `memory_search_sql`, `memory_commit_archival` |
+| Meta-Evolution | §08-meta-evolution | `evolve_orient`, `evolve_set_target`, `evolve_propose`, `evolve_apply`, `evolve_rollback`, `evolve_create_skill`, `evolve_modify_loop`, `evolve_history` |
+| Meta-Evaluation | §09-meta-evaluation | `review_proposal`, `review_modify`, `review_criteria_update`, `review_history` + `_internal/prompt_builder.py` |
+| Context Orchestration | §06-context-orchestration | `context_load`, `context_get_manifest` |
 
 ### Generated skills (15 — implemented from spec during build)
 
@@ -1974,10 +1974,10 @@ First-boot detection (absence of `session/current_cycle.json`). Create all direc
 | Identity | Low | Read/update identity.json |
 | Mission | Low | Read/update goals |
 | Reasoning | Low | Structured thinking helpers |
-| Attention | Low | Prioritization helpers |
+| Scratchpad | Low | Dynamic contextual whiteboard |
 | Tool Use | Low | Shell/HTTP/file wrappers |
 | Communication | Low | Format/respond |
-| Research | Low | Search/evaluate/synthesize stubs |
+| Web Research | Low | Search/evaluate/synthesize stubs |
 
 ---
 
@@ -2072,10 +2072,10 @@ boros/
 │   │   ├── skill.json
 │   │   ├── functions/
 │   │   │   ├── __init__.py
-│   │   │   ├── memory_read.py
-│   │   │   ├── memory_write.py
-│   │   │   ├── memory_update.py
-│   │   │   └── memory_stats.py
+│   │   │   ├── memory_page_in.py
+│   │   │   ├── memory_page_out.py
+│   │   │   ├── memory_search_sql.py
+│   │   │   └── memory_commit_archival.py
 │   │   ├── state/              ← intentionally empty; data lives in boros/memory/
 │   │   ├── snapshots/
 │   │   ├── tests/
@@ -2091,8 +2091,7 @@ boros/
 │   │   │   ├── __init__.py
 │   │   │   ├── router_get_tools.py
 │   │   │   ├── router_get_budget.py
-│   │   │   ├── router_register_demand.py
-│   │   │   └── router_unregister_demand.py
+│   │   │   └── router_manifest.py
 │   │   ├── state/
 │   │   │   └── routing_rules.json
 │   │   ├── snapshots/

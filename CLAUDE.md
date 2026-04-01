@@ -140,7 +140,7 @@ Eval Bridge owns both. After `eval_update_high_water`: copies `boros/` (minus `s
 
 ### Regression Protection
 
-High-water marks: `skills/eval-bridge/state/high_water_marks.json`. Auto-rollback if any category drops > 0.02 below its best score.
+High-water marks: `skills/eval-bridge/state/high_water_marks.json`. Auto-rollback if any category drops below its best score by more than the adaptive threshold (0.05 cycles 1–10, 0.03 cycles 11–30, 0.02 cycles 31+).
 
 ---
 
@@ -238,10 +238,10 @@ Proposal field renamed from `test_results` → `baseline_test_results`. Meta-eva
 
 ## Seed Skills — Implementation Notes
 
-Four seed skills are hand-written in `Universal-Skills.md` and their standalone SKILL.md files in `skills/`. These are copied verbatim during Phase 1 build. The Python implementations contain all fixes from Decisions 25–35.
+Four seed skills are hand-written in `Universal-Skills.md` and their standalone SKILL.md files in `skills/`. These are copied verbatim during Phase 3 build. The Python implementations contain all fixes from Decisions 25–35.
 
 **Seed skill files (verified accurate as of 2026-04-01):**
-- `04-memory-SKILL.md` — SOTA Tiered Memory with paging (page_in, page_out, search_sql, commit_archival)
+- `04-memory-SKILL.md` — SOTA Tiered Memory with paging (`memory_page_in`, `memory_page_out`, `memory_search_sql`, `memory_commit_archival`)
 - `06-context-orchestration-SKILL.md` — Lean OS-Style loader with Associative Whisper
 - `08-meta-evolution-SKILL.md` — Full SWE Editor (evolve_propose with proposed_skillmd and target_category)
 - `09-meta-evaluation-SKILL.md` — Aggressive Code Review Board (correct dimensions, Infrastructure Failure Policy)
