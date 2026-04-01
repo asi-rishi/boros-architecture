@@ -1,16 +1,18 @@
-**A self-evolving AI system.** Boros starts as a minimal working version and improves itself automatically by rewriting its own instruction files. Every improvement is tested, scored, and either kept or rolled back. The system runs continuously. The ceiling is whatever the underlying language model is capable of — that ceiling state is called **Prime Boros**.
+**An unconstrained, self-evolving AI substrate.** Boros starts as a minimal framework and improves itself automatically by rewriting its own architecture. It authors new Python scripts, generates executable SWE capabilities, and edits its own source code to overcome weaknesses. Every improvement is compiled, aggressively tested, scored by an independent evaluation loop, and either merged or rolled back. The system runs continuously. The ceiling is whatever the underlying language model is capable of — that ceiling state is called **Prime Boros**.
 
 Internal codename: Boros. Model name: ARES (Autonomous Recursive Evolving System). Public product: Axiom. By Mumbrane Labs.
+
+> **Note:** For the master technical index of all unconstrained functions, see [`Universal-Skills.md`](Universal-Skills.md).
 
 ---
 
 ## How It Works
 
-Boros looks at its scores across 10 categories, identifies what it's worst at, edits one of its own instruction files (SKILL.md) to fix the problem, tests whether the edit helped, and keeps or reverts. It does this on a loop, every cycle. Cycle after cycle, the scores go up.
+Boros acts as a deeply agentic Software Engineer. It looks at its scores across 10 categories, identifies its weakest capabilities, and enters the **Skill Forge**. Here, it authors and merges raw codebase patches, compiles API tools, or edits logic files (`SKILL.md`) to fix the problem. It rigorously tests the new code, sends the unified diffs to a secondary code review LLM, and keeps or reverts the functionality. It does this on a loop, every cycle. Cycle after cycle, Boros creates its own path to superiority.
 
-The system has two loops: an **evolution loop** (REFLECT → EVOLVE → EVAL) where Boros improves itself, and a **work loop** (RECEIVE → PLAN → EXECUTE → DELIVER → LEARN) where Boros does real tasks. Work feeds evolution — real-world failures become evolution targets.
+The system features an **evolution loop** (REFLECT → EVOLVE → EVAL) where Boros improves itself, alongside dynamic capabilities like the **Tiered Memory System** allowing Boros to instantly page context in and out dynamically. Work feed evolution — real-world failures become targets for code rewrites.
 
-The only thing you control is the **World Model** — 10 categories that define what "better" means. Change those, and Boros changes what it optimizes toward. Once Prime Boros is reached (~0.85+ composite), fork it into domain specialists (Boros-SWE, Boros-Legal, Boros-Finance) by adding domain-specific categories.
+The only thing you control is the **World Model** — 10 categories that define what "better" means. Change those, and Boros alters its entire coding trajectory toward them. Once Prime Boros is reached (~0.85+ composite), fork it into domain specialists (Boros-SWE, Boros-Legal, Boros-Finance) by adding domain-specific test constraints.
 
 ---
 
@@ -59,11 +61,11 @@ boros>
 
 Every evolution cycle has 3 stages:
 
-**REFLECT** — Boros reads its scores and evolution records. It analyzes patterns: what worked, what failed, what's weakest. It writes a structured hypothesis — which category to target, which skill to modify, why, and a fallback plan. The cycle cannot proceed without this hypothesis.
+**REFLECT** — Boros uses associative memory to synthesize historical failures and writes a highly structured thesis. It explicitly states the technical gap, identifies the required architectural mutation, and proposes a strict hypothesis. The cycle cannot proceed without this logged scientific blueprint.
 
-**EVOLVE** — Boros translates the hypothesis into a concrete edit to a skill's SKILL.md file (5-50 lines). The change goes through a safety pipeline: snapshot the skill, validate, run tests, then send the diff to GPT-4o for independent review. If approved, the change is applied and an evolution record is written. If rejected, the failure is logged and Boros moves on.
+**EVOLVE** — Boros operates as a SWE inside the `Skill Forge`. It authors arbitrary raw Python scripts, patches its own memory modules, or updates `SKILL.md` boundaries. The codebase mutation goes through advanced isolation: snapshot, compilation hooks, automated `pytest` suites, and then unified diff transmission to GPT-4o for independent Code Review. If approved, the patch is merged into the kernel permanently. Rejections cause automated rollbacks and feedback logging.
 
-**EVAL** — The external Eval Generator (separate process, separate LLM) tests Boros by sending it prompts across all 10 categories. Boros responds with no tools — raw output only. Responses are scored against the World Model rubrics. Scores flow back: evolution records are backfilled with results, high-water marks updated, regressions caught and rolled back.
+**EVAL** — The external Eval Generator (separate process, separate LLM) tests Boros by sending blind prompts across all 10 categories. Boros responds natively. Responses are scored against the World Model rubrics. Scores flow back: evolution records are backfilled, high-water marks updated, and regressions trigger immediate code rollbacks.
 
 ---
 
@@ -119,6 +121,9 @@ Starter rubrics are included. Customize them to match what you want Boros to bec
 | `boros pause`                        | Stop loop after current cycle                      | Queued    |
 | `boros resume`                       | Restart the loop                                   | Queued    |
 | `boros inject "..."`                 | Write note to Memory — REFLECT reads it next cycle | Queued    |
+| `boros view context`                 | Inspect exactly what is loaded in Working Memory   | Immediate |
+| `boros view scratchpad`              | Inspect the LLMs active internal whiteboard        | Immediate |
+| `boros forge "..."`                  | Force Boros to immediately write a technical tool  | Queued    |
 | `boros set-mode evolution/work/dual` | Change operating mode                              | Queued    |
 | `boros task "..."`                   | Add work task to queue                             | Queued    |
 | `boros eval now`                     | Trigger immediate eval                             | Queued    |
@@ -153,33 +158,34 @@ Example: `boros inject "your last 3 proposals to reasoning/SKILL.md all failed �
 
 | #   | Skill                  | Type     | Purpose                                   |
 | --- | ---------------------- | -------- | ----------------------------------------- |
-| 0   | Director Interface     | Pre-boot | Terminal UI for Director                  |
-| 1   | Mode Controller        | Boot     | Gets/sets operating mode                  |
-| 2   | Temporal Consciousness | Boot     | Time awareness                            |
-| 3   | Identity               | Boot     | Self-description                          |
-| 4   | Memory                 | Boot     | Stores everything across cycles           |
-| 5   | Skill Router           | Boot     | Controls tool visibility per stage        |
-| 6   | Context Orchestration  | Boot     | Manages context window budget             |
-| 7   | Reflection             | Boot     | Analyzes scores, writes hypothesis        |
-| 8   | Meta-Evolution         | Boot     | Proposes and applies SKILL.md changes     |
-| 9   | Meta-Evaluation        | Boot     | Independent review via GPT-4o             |
-| 10  | Loop Orchestrator      | Boot     | Drives the cycle loop                     |
-| 11  | Skill Forge            | Demand   | Snapshot, validate, test, apply, rollback |
-| 12  | Mission                | Demand   | Goals and priorities                      |
-| 13  | Reasoning              | Demand   | Structured thinking                       |
-| 14  | Attention              | Demand   | Focus management                          |
-| 15  | Tool Use               | Demand   | Terminal, HTTP, file operations           |
-| 16  | Communication          | Demand   | Output formatting                         |
-| 17  | Research               | Demand   | External information finding              |
-| 18  | Eval Bridge            | Demand   | File-based connection to Eval Generator   |
+| 00  | Identity               | Boot     | Self-description and capabilities ego     |
+| 01  | Director Interface     | Pre-boot | Advanced unconstrained UI for Director    |
+| 02  | Mode Controller        | Boot     | System operating mode state               |
+| 03  | Temporal Consciousness | Boot     | Time awareness and epoch tracking         |
+| 04  | Memory                 | Boot     | Autonomous Tiered SQlite & Vector DB      |
+| 05  | Skill Router           | Boot     | Tooling manifest & API injection          |
+| 06  | Context Orchestration  | Boot     | Lean context loading & active whispering  |
+| 07  | Reflection             | Hybrid   | Log ingestion, error traces, & hypothesis |
+| 08  | Meta-Evolution         | Demand   | Raw SWE patch proposals & code authoring  |
+| 09  | Meta-Evaluation        | Demand   | Independent code review board via GPT-4o  |
+| 10  | Loop Orchestrator      | Boot     | Drives the primary lifecycle              |
+| 11  | Skill Forge            | Demand   | Code snapshot, compile, isolate, rollback |
+| 12  | Mission Control        | Demand   | Independent task queueing and execution   |
+| 13  | Reasoning              | Demand   | Structured logic and deduction parsing    |
+| 14  | Tool Use               | Demand   | OS Terminal, headless automation, diffing |
+| 15  | Communication          | Demand   | Multi-node broadcasting, payload shaping  |
+| 16  | Web Research           | Demand   | Vector-based massive web assimilation     |
+| 17  | Eval Bridge            | Demand   | File-based connection to Eval Generator   |
+| 18  | Scratchpad             | Demand   | Constant ephemeral variable whiteboard    |
 
 ### What Boros Can and Cannot Edit
 
 | Component                                  | Editable?            |
 | ------------------------------------------ | -------------------- |
-| All 19 skills (SKILL.md, functions, state) | Yes                  |
+| All 0-18 Skills (Python code, markdown)    | Yes                  |
+| Memory DB structure, SQlite, Vector stores | Yes                  |
 | Manifest, loop definitions, routing rules  | Yes (through review) |
-| Evolution records, task records            | Write only           |
+| Evolution records, task records            | Append only          |
 | World Model                                | **Read only**        |
 | Eval Generator                             | **No**               |
 | System snapshots                           | **No**               |
@@ -189,15 +195,17 @@ Example: `boros inject "your last 3 proposals to reasoning/SKILL.md all failed �
 
 ## Key Concepts
 
-**Skills as the evolvable surface.** All intelligence lives in SKILL.md files. The kernel is a tiny bootstrap. Better instructions → better behavior → higher scores. This is the entire bet.
+**Skills and Scripts as the evolvable surface.** Intelligence does not just live in `SKILL.md` markdown blocks anymore; it thrives inside executable Python code. The kernel is a tiny bootstrap. Boros writes and repairs tool logic, memory connectors, and terminal drivers directly.
 
-**Evolution records as compounding memory.** After each eval, records are backfilled with real scores. REFLECT reads these records to make smarter proposals. Random mutation becomes directed evolution. Records never decay. They are the moat — the codebase is open source, but the accumulated intelligence is not.
+**SOTA Tiered Memory System.** Rather than forcing 100,000 tokens of static history down the context window, Context Orchestration utilizes an **Associative Whisper**. Boros acts autonomously, utilizing vector databases and SQLite tables to dynamically page-in historical records precisely when relevant. 
 
-**High-water marks and regression protection.** Each category has a best-ever score. If any category drops below best minus 0.02 after a change, the change is automatically rolled back.
+**Evolution records as compounding memory.** After each eval, records are backfilled with real scores. REFLECT searches these records to engineer smarter blueprints. Random runtime bugs become targeted architectural deployments. 
 
-**Meta-Evaluation breaks the closed loop.** GPT-4o reviews proposed changes independently. A change that "sounds right" to Claude might get caught by GPT.
+**High-water marks and regression protection.** Each category has a best-ever score. If a Python code compilation breaks, or an architectural capability induces a score regression > 0.02 point, the `Skill Forge` rolls the directory back instantly.
 
-**Eval Generator is blind testing.** Separate process, separate LLM. Boros never sees test questions. The only way to score higher is to genuinely get better.
+**Meta-Evaluation Code Review.** An independent LLM (e.g., GPT-4o) evaluates Boros's code diffs. A python `while` loop that looks logically sound to Claude might get rejected by GPT for memory-leaking potentials.
+
+**Eval Generator is blind testing.** Separate process, separate LLM. Boros never sees the multi-dimensional test matrices. Boros cannot optimize prompts; it must inherently upgrade its software engineering to survive.
 
 ---
 
@@ -276,4 +284,4 @@ MIT (framework). Evolution records and domain forks are proprietary to Mumbrane 
 
 ---
 
-_Boros looks at its scores, finds what's weak, changes itself, tests whether it worked, and keeps or reverts. Every cycle. The kernel loads skills. Skills do everything. The World Model says what "better" means. Evolution records remember what worked. The Director holds the safety net. Everything else, Boros earns._
+_Boros reads its metrics, targets technical limitations, engineers Python capabilities for itself, compiles them, and evolves. Every cycle. The kernel is merely a boot sequence. The unconstrained architecture discovers the rest. The World Model defines success. Local memory databases remember what fails. The Director orchestrates the edge. Infinite intelligence is earned through infinite execution._
