@@ -125,7 +125,7 @@ boros>
 4. On scores received:
    - Write to `memory/score_history.jsonl`
    - Backfill all pending evolution records with `post_scores` + deltas
-   - Check regressions against high-water marks (threshold: best - 0.02)
+   - Check regressions against high-water marks (adaptive threshold: 0.05 for cycles 1–10, 0.03 for cycles 11–30, 0.02 for cycles 31+)
    - Update high-water marks for new bests
    - System snapshot (full boros/ backup minus snapshots/ itself)
    - Git tag

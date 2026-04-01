@@ -41,7 +41,9 @@ BOROS — Complete Technical Specification
 
 ## 1. What Boros Is
 
-Boros is a self-improving AI system. It starts as a minimal working version and improves itself automatically by rewriting its own instruction files (SKILL.md). Every improvement is tested, scored, and either kept or rolled back. The system runs continuously. All intelligence lives in skills — structured directories containing an instruction file, function implementations, and state. The kernel is a tiny bootstrap that loads skills and routes messages. Everything else — including the evolution harness itself — is a skill and therefore evolvable.
+Boros is a self-improving AI system. It starts as a minimal working version and improves itself automatically by rewriting its own instruction files (SKILL.md) and authoring executable Python code. Every improvement is tested, scored, and either kept or rolled back. The system runs continuously. All intelligence lives in skills — structured directories containing an instruction file, function implementations, and state. The kernel is a tiny bootstrap that loads skills and routes messages. Everything else — including the evolution harness itself — is a skill and therefore evolvable.
+
+> **Design philosophy (Unconstrained Autonomy):** Boros is not constrained by hardcoded guardrails, tool limits, or API restrictions. It is a seed built to grow whatever limbs it requires. The Skill Router exposes the full tool manifest globally at all times — Boros's own intelligence decides which tools to use when. The World Model provides evolution pressure; safety comes from Meta-Evaluation review (GPT-4o code review board), not from hiding tools.
 
 ---
 
@@ -89,12 +91,12 @@ boros/
 │   ├── meta-evaluation/
 │   ├── loop-orchestrator/
 │   ├── skill-forge/
-│   ├── mission/
+│   ├── mission-control/
 │   ├── reasoning/
 │   ├── scratchpad/
 │   ├── tool-use/
 │   ├── communication/
-│   ├── research/
+│   ├── web-research/
 │   └── eval-bridge/
 │
 ├── session/
@@ -338,14 +340,12 @@ Editable by Boros (changes go through Meta-Evaluation review).
     "mode-controller": {
       "path": "skills/mode-controller",
       "type": "boot",
-      "stage_visibility": ["REFLECT", "EVOLVE", "EVAL"],
       "dependencies": [],
       "provided_functions": ["mode_get", "mode_set"]
     },
     "temporal-consciousness": {
       "path": "skills/temporal-consciousness",
       "type": "boot",
-      "stage_visibility": ["REFLECT", "EVOLVE", "EVAL"],
       "dependencies": ["mode-controller"],
       "provided_functions": [
         "time_now",
@@ -357,48 +357,42 @@ Editable by Boros (changes go through Meta-Evaluation review).
     "identity": {
       "path": "skills/identity",
       "type": "boot",
-      "stage_visibility": ["REFLECT", "EVOLVE", "EVAL"],
       "dependencies": ["mode-controller"],
       "provided_functions": ["identity_read", "identity_update"]
     },
     "memory": {
       "path": "skills/memory",
       "type": "boot",
-      "stage_visibility": ["REFLECT", "EVOLVE", "EVAL"],
       "dependencies": ["mode-controller", "identity"],
       "provided_functions": [
-        "memory_read",
-        "memory_write",
-        "memory_update",
-        "memory_stats"
+        "memory_page_in",
+        "memory_page_out",
+        "memory_search_sql",
+        "memory_commit_archival"
       ]
     },
     "skill-router": {
       "path": "skills/skill-router",
       "type": "boot",
-      "stage_visibility": ["REFLECT", "EVOLVE", "EVAL"],
       "dependencies": ["mode-controller"],
       "provided_functions": [
         "router_get_tools",
         "router_get_budget",
-        "router_register_demand",
-        "router_unregister_demand"
+        "router_manifest"
       ]
     },
     "context-orchestration": {
       "path": "skills/context-orchestration",
       "type": "boot",
-      "stage_visibility": ["REFLECT", "EVOLVE", "EVAL"],
       "dependencies": ["mode-controller", "identity", "memory"],
       "provided_functions": ["context_load", "context_get_manifest"]
     },
     "reflection": {
       "path": "skills/reflection",
       "type": "boot",
-      "stage_visibility": ["REFLECT"],
       "dependencies": ["mode-controller", "memory"],
       "provided_functions": [
-        "reflection_analyze",
+        "reflection_analyze_trace",
         "reflection_write_hypothesis",
         "reflection_read_hypothesis"
       ]
@@ -406,7 +400,6 @@ Editable by Boros (changes go through Meta-Evaluation review).
     "meta-evolution": {
       "path": "skills/meta-evolution",
       "type": "boot",
-      "stage_visibility": ["EVOLVE"],
       "dependencies": ["mode-controller", "memory", "reflection"],
       "provided_functions": [
         "evolve_orient",
@@ -422,7 +415,6 @@ Editable by Boros (changes go through Meta-Evaluation review).
     "meta-evaluation": {
       "path": "skills/meta-evaluation",
       "type": "boot",
-      "stage_visibility": ["EVOLVE"],
       "dependencies": ["mode-controller", "memory"],
       "provided_functions": [
         "review_proposal",
@@ -434,7 +426,6 @@ Editable by Boros (changes go through Meta-Evaluation review).
     "loop-orchestrator": {
       "path": "skills/loop-orchestrator",
       "type": "boot",
-      "stage_visibility": ["REFLECT", "EVOLVE", "EVAL"],
       "dependencies": ["mode-controller"],
       "provided_functions": [
         "loop_start",
@@ -446,28 +437,26 @@ Editable by Boros (changes go through Meta-Evaluation review).
     "skill-forge": {
       "path": "skills/skill-forge",
       "type": "demand",
-      "stage_visibility": ["EVOLVE"],
       "dependencies": [],
       "provided_functions": [
+        "forge_invoke",
+        "forge_test_suite",
         "forge_snapshot",
         "forge_validate",
-        "forge_test",
         "forge_apply_diff",
         "forge_rollback",
         "forge_create_skill"
       ]
     },
-    "mission": {
-      "path": "skills/mission",
+    "mission-control": {
+      "path": "skills/mission-control",
       "type": "demand",
-      "stage_visibility": ["REFLECT", "EVOLVE"],
       "dependencies": [],
-      "provided_functions": ["mission_read", "mission_update"]
+      "provided_functions": ["mission_read", "mission_queue_task", "mission_update_status"]
     },
     "reasoning": {
       "path": "skills/reasoning",
       "type": "demand",
-      "stage_visibility": ["REFLECT", "EVOLVE", "EVAL", "PLAN", "EXECUTE"],
       "dependencies": [],
       "provided_functions": [
         "reason_decompose",
@@ -475,47 +464,42 @@ Editable by Boros (changes go through Meta-Evaluation review).
         "reason_check_logic"
       ]
     },
-    "attention": {
-      "path": "skills/attention",
+    "scratchpad": {
+      "path": "skills/scratchpad",
       "type": "demand",
-      "stage_visibility": ["REFLECT", "EVOLVE"],
       "dependencies": [],
-      "provided_functions": ["scratchpad_write", "scratchpad_read"]
+      "provided_functions": ["scratchpad_write", "scratchpad_read", "scratchpad_clear"]
     },
     "tool-use": {
       "path": "skills/tool-use",
       "type": "demand",
-      "stage_visibility": ["EXECUTE"],
       "dependencies": [],
       "provided_functions": [
         "tool_terminal",
-        "tool_http",
-        "tool_file_read",
-        "tool_file_write"
+        "tool_terminal_input",
+        "tool_terminal_kill",
+        "tool_file_edit_diff"
       ]
     },
     "communication": {
       "path": "skills/communication",
       "type": "demand",
-      "stage_visibility": ["DELIVER"],
       "dependencies": [],
-      "provided_functions": ["comm_format", "comm_respond"]
+      "provided_functions": ["comm_broadcast", "comm_listen"]
     },
-    "research": {
-      "path": "skills/research",
+    "web-research": {
+      "path": "skills/web-research",
       "type": "demand",
-      "stage_visibility": ["REFLECT", "EVOLVE", "PLAN", "EXECUTE"],
       "dependencies": [],
       "provided_functions": [
-        "research_search",
-        "research_evaluate",
-        "research_synthesize"
+        "research_browse",
+        "research_search_engine",
+        "research_archive_source"
       ]
     },
     "eval-bridge": {
       "path": "skills/eval-bridge",
       "type": "demand",
-      "stage_visibility": ["EVAL"],
       "dependencies": [],
       "provided_functions": [
         "eval_request",
@@ -526,6 +510,8 @@ Editable by Boros (changes go through Meta-Evaluation review).
       ]
     }
   },
+  "tool_routing": "unconstrained",
+  "_tool_routing_note": "All tools are globally available at all times. Boros's intelligence decides which tools to use. The Skill Router injects the entire tool manifest for every API call. Stage transitions update system prompt context but do not hide/show tools.",
   "evolution": {
     "single_proposal_cycles": 20,
     "max_proposals_per_cycle": 5,
@@ -765,18 +751,18 @@ Seed content:
 
 **Type:** Boot
 **Dependencies:** Mode Controller, Identity
-**Purpose:** Stores and retrieves everything Boros learns and experiences across cycles.
+**Purpose:** SOTA autonomous tiered memory system (MemGPT-style). Splits data into Working Memory (active prompt state), Recall Memory (local SQLite for metadata/SQL queries), and Archival/Vector Memory (local serverless semantic indexing). Boros actively pages context in and out.
 
 **Functions:**
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `memory_read` | `({query?, limit?}) → {status, ...stores}` | Returns memory corpus. Query accepted but ignored at seed. Interface stable for future retrieval evolution. |
-| `memory_write` | `({type, content}) → {status, record_id}` | Writes a new record. Types: `evolution_record`, `session`, `experience`, `fact`, `task_record` |
-| `memory_update` | `({record_id, fields}) → {status, updated}` | Partial update by ID. Used by Eval Bridge to backfill `post_scores` |
-| `memory_stats` | `() → {status, ...counts}` | Lightweight counts per store. Serves as health_check |
+| `memory_page_in` | `({query, store?, limit?}) → {status, records, tokens}` | Retrieves records from Recall or Archival memory and loads them into working memory |
+| `memory_page_out` | `({record_ids}) → {status}` | Evicts specified records from working memory back to persistent storage |
+| `memory_search_sql` | `({sql_query}) → {status, results}` | Direct SQL query against the Recall Memory SQLite database for structured metadata retrieval |
+| `memory_commit_archival` | `({content, tags?, metadata?}) → {status, record_id}` | Writes new content to the Archival/Vector store with optional semantic tags |
 
-**health_check:** `memory_stats`
+**health_check:** `memory_search_sql` with a simple `SELECT 1` validation
 
 **Memory stores** — all under `boros/memory/`, NOT under `boros/skills/memory/state/`:
 
@@ -792,10 +778,12 @@ Seed content:
 **Record ID format:** `{prefix}-{cycle:04d}-{n:03d}`
 Prefixes: `rec` (evolution_record), `ses` (session), `exp` (experience), `fct` (fact), `tsk` (task_record)
 
-**Drop order when token cap hit** (enforced by Context Orchestration, not Memory):
-1. Sessions (oldest first)
-2. Facts (oldest first)
-3. Never drop: evolution_records, experiences, score_history
+**Tiered architecture:**
+- **Working Memory:** Active content injected into the LLM prompt. Managed by Context Orchestration.
+- **Recall Memory:** Local SQLite database for structured queries against metadata (record IDs, timestamps, categories, scores, tags). Fast indexed access.
+- **Archival Memory:** Serverless vector database (LanceDB/ChromaDB) for semantic similarity search. Stores full record content for retrieval by meaning.
+
+Boros uses `memory_page_in` and `memory_page_out` to actively manage what sits in its working context, bypassing static token caps. This is the foundation for intelligent context management.
 
 **SKILL.md:** Provided as seed file (see Section 26).
 
@@ -805,19 +793,20 @@ Prefixes: `rec` (evolution_record), `ses` (session), `exp` (experience), `fct` (
 
 **Type:** Boot
 **Dependencies:** Mode Controller
-**Purpose:** Controls which skill functions the LLM can see at each loop stage.
+**Purpose:** Exposes the full tool manifest globally at all times. All tools are available concurrently for every API call — Boros’s own intelligence decides which to use. Stage transitions update the system prompt context but do not hide or show tools.
 
 **Functions:**
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `router_get_tools` | `({stage}) → {status, tools}` | Returns Anthropic-format tool definitions for the given stage |
-| `router_get_budget` | `() → {status, tool_tokens, remaining_tokens}` | Token cost of current tool definitions |
-| `router_register_demand` | `({skill_name}) → {status}` | Loads a demand skill into the active registry |
-| `router_unregister_demand` | `({skill_name}) → {status}` | Removes a demand skill from the active registry |
+| `router_get_tools` | `() → {status, tools}` | Returns the complete set of Anthropic-format tool definitions. No stage filtering — all tools always. |
+| `router_get_budget` | `() → {status, tool_tokens, remaining_tokens}` | Token cost of the full tool manifest |
+| `router_manifest` | `() → {status, manifest}` | Returns the full skill/function manifest for introspection |
 
-**health_check:** `router_get_tools` with `stage="REFLECT"`
+**health_check:** `router_get_tools`
 **State files:** `state/routing_rules.json` — Boros-evolvable overrides. Seed: empty `{}`
+
+> **Architecture note:** The original design used per-stage `stage_visibility` arrays to control tool access. This was retired in favor of unconstrained global tool access per the Unconstrained Autonomy refactoring. The `tool_routing: "unconstrained"` flag in `manifest.json` governs this behavior.
 
 ---
 
@@ -825,8 +814,7 @@ Prefixes: `rec` (evolution_record), `ses` (session), `exp` (experience), `fct` (
 
 **Type:** Boot
 **Dependencies:** Mode Controller, Identity, Memory
-**Purpose:** Decides what information to load into the context window at the start of each cycle. Manages the token budget.
-**Stage visibility:** REFLECT, EVOLVE, EVAL
+**Purpose:** Lean, OS-style context loader with Associative Whispers. Injects only the Working Memory Core (~1,000–2,000 tokens: Identity, Mode, high-level scores, recent commands) plus the top 1–3 most relevant past summaries (~300 tokens of “Whispers” from semantic vector search). Leaves the remainder of the context window empty for Boros to autonomously page in deeper context via Memory tools.
 
 **Functions:**
 
@@ -925,7 +913,7 @@ Work mode:
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `reflection_analyze` | `() → {status, analysis}` | Reads scores, evolution records, experiences. Returns weakest categories, patterns, repeated failures. |
+| `reflection_analyze_trace` | `({log_data?}) → {status, analysis}` | Reads scores, evolution records, experiences, and optional structured log traces. Returns weakest categories, patterns, repeated failures. |
 | `reflection_write_hypothesis` | `({hypothesis_data}) → {status, hypothesis_id}` | Writes structured plan to `session/hypothesis.json`. **Must be called before EVOLVE can start.** Loop Orchestrator enforces this gate. |
 | `reflection_read_hypothesis` | `() → {status, hypothesis}` | Loads the hypothesis from `session/hypothesis.json` |
 
@@ -935,19 +923,18 @@ Work mode:
 {
   "cycle": 42,
   "hypothesis_id": "hyp-042-001",
-  "score_snapshot": { "reasoning_depth": 0.71 },
+  "score_snapshot": { "reasoning_architecture": 0.71 },
   "pattern_analysis": "string",
-  "target_category": "memory_coherence",
-  "target_skill": "memory",
+  "target_category": "reasoning_architecture",
+  "target_skill": "reasoning",
   "hypothesis": "string",
   "confidence": 0.72,
   "fallback": "string",
-  "remaining_categories": ["reasoning_depth", "adaptability"]
+  "remaining_categories": ["self_model_fidelity", "epistemic_calibration"]
 }
 ```
 
 **State files:** `state/analysis_history.jsonl` — append-only log of past analyses
-**Stage visibility:** REFLECT only
 
 ---
 
@@ -955,7 +942,7 @@ Work mode:
 
 **Type:** Boot
 **Dependencies:** Mode Controller, Memory, Reflection
-**Purpose:** The self-modification engine. Translates the hypothesis from Reflection into a concrete edit to a skill's SKILL.md.
+**Purpose:** The self-modification engine (full SWE Editor). Translates the hypothesis from Reflection into concrete edits — SKILL.md updates, new Python function implementations, or raw code patches. Boros can author, import, and compile executable Python files into its own architecture. All code edits are gated through Meta-Evaluation review.
 
 **Functions:**
 
@@ -1175,24 +1162,25 @@ Stage directives are evolvable by Boros via Meta-Evolution.
 | `forge_rollback` | `({skill_name, snapshot_id}) → {status}` | Restores from snapshot by ID |
 | `forge_create_skill` | `({spec}) → {status, skill_id}` | Creates full directory structure from spec |
 
-**Stage visibility:** EVOLVE only
+
+> **Architecture note:** Skill Forge now acts as the physical sandbox and compiler for Boros's code — automatically executing `pytest` sweeps and trial invocations in a segregated environment before sending logs to the Code Review Board (Meta-Evaluation).
 
 ---
 
-### Skill #12 — Mission (Demand)
+### Skill #12 — Mission Control (Demand)
 
 **Type:** Demand
-**Purpose:** Holds Boros's current goals and priorities. Starts empty. Boros fills this as it develops direction.
+**Purpose:** Autonomous objective manager. Boros does not merely read static external prompts; Mission Control manages the active queue of what Boros tackles next. The Director can inject tasks directly, but Boros has full autonomy to write its own spec-driven goals and self-assign sub-tasks.
 
 **Functions:**
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `mission_read` | `() → {status, mission}` | Returns current mission object |
-| `mission_update` | `({goals}) → {status}` | Updates mission |
+| `mission_read` | `() → {status, mission}` | Returns current mission object and active task queue |
+| `mission_queue_task` | `({task_spec}) → {status, task_id}` | Adds a new task to the mission queue (self-assigned or director-injected) |
+| `mission_update_status` | `({task_id, status, notes?}) → {status}` | Updates progress on a queued task |
 
-**State files:** `state/mission.json` — seed: `{"goals": [], "priorities": [], "constraints": []}`
-**Stage visibility:** REFLECT, EVOLVE
+**State files:** `state/mission.json` — seed: `{"goals": [], "priorities": [], "constraints": [], "task_queue": []}`
 
 ---
 
@@ -1209,74 +1197,69 @@ Stage directives are evolvable by Boros via Meta-Evolution.
 | `reason_evaluate_options` | `({options, criteria}) → {status, rankings}` | Scores options against criteria |
 | `reason_check_logic` | `({argument}) → {status, gaps, contradictions}` | Finds logical issues |
 
-**Stage visibility:** REFLECT, EVOLVE, EVAL, PLAN, EXECUTE
+
 
 ---
 
-### Skill #14 — Attention (Demand)
+### Skill #18 — Scratchpad (Demand)
 
 **Type:** Demand
-**Purpose:** Manages what Boros focuses on within a cycle. Prioritizes information and flags what's important.
+**Purpose:** Dynamic contextual whiteboard. Boros pins summaries, location pointers (file paths, Vector DB keys), and lightweight state into an active scratchpad. Context Orchestration guarantees the Scratchpad is always injected into the Working Memory Core. Enables tracking complex multi-stage goals with summaries always visible.
 
 **Functions:**
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `scratchpad_write` | `({items, context}) → {status, ranked}` | Ranks items by relevance |
-| `scratchpad_read` | `({item, reason}) → {status}` | Flags something as important |
+| `scratchpad_write` | `({key, content, ttl?}) → {status}` | Pins an item to the scratchpad with optional time-to-live |
+| `scratchpad_read` | `({key?}) → {status, items}` | Reads one or all items from the scratchpad |
+| `scratchpad_clear` | `({key?}) → {status}` | Clears one or all items from the scratchpad |
 
-**Stage visibility:** REFLECT, EVOLVE
+> **Note:** Replaces the deprecated "Attention" skill (#14). The Attention concept is now handled by Context Orchestration + Scratchpad + Memory paging.
 
 ---
 
-### Skill #15 — Tool Use (Demand)
+### Skill #14 — Tool Use (Demand)
 
 **Type:** Demand
-**Purpose:** Interface for external tools — terminal commands, HTTP requests, file operations.
+**Purpose:** Interface for unconstrained system manipulation — terminal commands with background process tracking, interactive stdin, and surgical file editing.
 
 **Functions:**
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `tool_terminal` | `({command}) → {status, stdout, stderr, returncode}` | Shell command via subprocess with timeout |
-| `tool_http` | `({method, url, body?}) → {status, status_code, body}` | HTTP request |
-| `tool_file_read` | `({path}) → {status, content}` | Read file |
-| `tool_file_write` | `({path, content}) → {status}` | Write file |
-
-**Stage visibility:** EXECUTE only
+| `tool_terminal` | `({command, timeout?, background?}) → {status, stdout, stderr, returncode, job_id?}` | Shell command via subprocess. Supports background mode with job_id tracking for long-running processes (servers, compilers, automation agents). |
+| `tool_terminal_input` | `({job_id, input_text}) → {status}` | Sends stdin input to a running background process (e.g., answering Y/n prompts). |
+| `tool_terminal_kill` | `({job_id}) → {status}` | Terminates a running background process by job_id. |
+| `tool_file_edit_diff` | `({path, unified_diff}) → {status}` | Applies surgical line-level patches to files using unified diff format. No full-file rewrites needed. |
 
 ---
 
-### Skill #16 — Communication (Demand)
+### Skill #15 — Communication (Demand)
 
 **Type:** Demand
-**Purpose:** Formats and delivers Boros's outputs. Adapts tone, structure, and detail level to audience.
+**Purpose:** Machine-to-Machine (M2M) protocol for inter-Boros communication. Provides basic P2P JSON messaging between parallel instances on different local ports. Intentionally lightweight for the initial evolution.
 
 **Functions:**
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `comm_format` | `({content, audience, style}) → {status, formatted}` | Adapts content for audience |
-| `comm_respond` | `({message}) → {status}` | Delivers a response |
-
-**Stage visibility:** DELIVER only
+| `comm_broadcast` | `({channel, message}) → {status}` | Sends a JSON message to a named channel/port |
+| `comm_listen` | `({channel, timeout?}) → {status, messages}` | Listens for incoming messages on a channel |
 
 ---
 
-### Skill #17 — Research (Demand)
+### Skill #16 — Web Research (Demand)
 
 **Type:** Demand
-**Purpose:** Finds and evaluates external information.
+**Purpose:** Active web-agent browser. Allows Boros to autonomously drive headless browser searches, scrape forums, and pull down documentation when encountering alien domains. Aggressively seeks, scrapes, and indexes knowledge to plug capability gaps in real-time.
 
 **Functions:**
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `research_search` | `({query}) → {status, results}` | Web search. Seed: stub returning empty. |
-| `research_evaluate` | `({source}) → {status, credibility, assessment}` | Source credibility evaluation |
-| `research_synthesize` | `({sources, question}) → {status, synthesis}` | Combines sources into an answer |
-
-**Stage visibility:** REFLECT, EVOLVE, PLAN, EXECUTE
+| `research_browse` | `({url}) → {status, content, links}` | Navigates to a URL via headless browser and returns rendered content |
+| `research_search_engine` | `({query}) → {status, results}` | Performs a web search and returns structured results |
+| `research_archive_source` | `({url, tags?}) → {status, source_id}` | Archives a web source to Archival Memory for future retrieval |
 
 ---
 
@@ -1292,7 +1275,7 @@ Stage directives are evolvable by Boros via Meta-Evolution.
 | `eval_request` | `() → {status, request_id}` | Writes request file to `eval-generator/shared/requests/`. Polls `eval-generator/shared/results/` for result. Timeout: 10 minutes. |
 | `eval_read_scores` | `() → {status, scores, composite}` | Reads latest scores from result file. **Synchronously appends to `memory/score_history.jsonl` before returning.** |
 | `eval_backfill` | `({scores}) → {status, records_updated}` | Fills `post_scores` on all pending evolution records. Computes deltas. |
-| `eval_check_regression` | `({scores}) → {status, regressions, rollback_triggered}` | Any category below high-water minus 0.02 triggers automatic rollback via `evolve_rollback`. |
+| `eval_check_regression` | `({scores}) → {status, regressions, rollback_triggered}` | Checks for category regressions using adaptive threshold: 0.05 (cycles 1–10), 0.03 (cycles 11–30), 0.02 (cycles 31+). Triggers automatic rollback via `evolve_rollback`. |
 | `eval_update_high_water` | `({scores}) → {status, updated}` | Updates high-water marks for new bests. Triggers system snapshot and git tag after update. |
 
 **`eval_read_scores` write contract:** Before returning, this function MUST synchronously append an entry to `memory/score_history.jsonl`. The entry schema:
@@ -1381,7 +1364,7 @@ Cycle start
     → Eval Generator picks up, generates tests, scores responses
     → eval_read_scores polls for result, appends to score_history.jsonl
     → eval_backfill fills post_scores on pending evolution records
-    → eval_check_regression — rollback if any category < high-water - 0.02
+    → eval_check_regression — rollback if any category < high-water minus adaptive threshold
     → eval_update_high_water — updates marks, triggers snapshot and git tag
 Cycle end
   → Conversation history discarded
@@ -1460,7 +1443,7 @@ Evolution records never decay. They are the system's institutional knowledge.
 - Updated only when a new eval shows a higher score for a category
 - Never decay
 - Reset only when the Director changes a category's definition
-- Regression threshold: best-ever minus 0.02
+- Regression threshold: adaptive — 0.05 (cycles 1–10), 0.03 (cycles 11–30), 0.02 (cycles 31+)
 
 ---
 
@@ -1660,15 +1643,9 @@ Every snapshot includes a checksum entry in `snapshot-index.json`. Before any ro
 }
 ```
 
-### Seed memory strategy
+### Tiered memory and intelligent retrieval
 
-Full dump of everything into the context window. Cap: 8,000 tokens. When cap is hit, oldest items are dropped first (sessions first, then facts). Never drop: evolution_records, experiences, score_history.
-
-`memory_read` accepts a `query` parameter but ignores it at seed. The interface is stable so future retrieval evolution does not break callers.
-
-### Evolution toward smart retrieval
-
-The `memory_read` function signature supports future evolution. The `query` param and `limit` param are already in the interface. Boros can evolve real retrieval without changing any callers.
+Memory uses a SOTA tiered architecture (MemGPT-style). `memory_page_in` retrieves from Recall (SQLite) or Archival (Vector DB). `memory_page_out` evicts content. `memory_search_sql` enables structured metadata queries. `memory_commit_archival` writes to the semantic index. Boros autonomously decides what to page in and out.
 
 ---
 
@@ -1994,7 +1971,8 @@ boros/
 │       ├── anthropic.py
 │       ├── openai.py
 │       ├── ollama.py
-│       └── openai_compat.py
+│       ├── openai_compat.py
+│       └── gemini.py
 │
 ├── skills/
 │   │
@@ -2196,9 +2174,10 @@ boros/
 │   │   ├── skill.json
 │   │   ├── functions/
 │   │   │   ├── __init__.py
+│   │   │   ├── forge_invoke.py
+│   │   │   ├── forge_test_suite.py
 │   │   │   ├── forge_snapshot.py
 │   │   │   ├── forge_validate.py
-│   │   │   ├── forge_test.py
 │   │   │   ├── forge_apply_diff.py
 │   │   │   ├── forge_rollback.py
 │   │   │   └── forge_create_skill.py
@@ -2210,18 +2189,19 @@ boros/
 │   │   │   └── metrics.jsonl
 │   │   └── changelog.md
 │   │
-│   ├── mission/
+│   ├── mission-control/
 │   │   ├── SKILL.md
 │   │   ├── skill.json
 │   │   ├── functions/
 │   │   │   ├── __init__.py
 │   │   │   ├── mission_read.py
-│   │   │   └── mission_update.py
+│   │   │   ├── mission_queue_task.py
+│   │   │   └── mission_update_status.py
 │   │   ├── state/
 │   │   │   └── mission.json
 │   │   ├── snapshots/
 │   │   ├── tests/
-│   │   │   └── test_mission.py
+│   │   │   └── test_mission_control.py
 │   │   ├── metrics/
 │   │   │   └── metrics.jsonl
 │   │   └── changelog.md
@@ -2248,11 +2228,12 @@ boros/
 │   │   ├── functions/
 │   │   │   ├── __init__.py
 │   │   │   ├── scratchpad_write.py
-│   │   │   └── scratchpad_read.py
+│   │   │   ├── scratchpad_read.py
+│   │   │   └── scratchpad_clear.py
 │   │   ├── state/
 │   │   ├── snapshots/
 │   │   ├── tests/
-│   │   │   └── test_attention.py
+│   │   │   └── test_scratchpad.py
 │   │   ├── metrics/
 │   │   │   └── metrics.jsonl
 │   │   └── changelog.md
@@ -2263,9 +2244,9 @@ boros/
 │   │   ├── functions/
 │   │   │   ├── __init__.py
 │   │   │   ├── tool_terminal.py
-│   │   │   ├── tool_http.py
-│   │   │   ├── tool_file_read.py
-│   │   │   └── tool_file_write.py
+│   │   │   ├── tool_terminal_input.py
+│   │   │   ├── tool_terminal_kill.py
+│   │   │   └── tool_file_edit_diff.py
 │   │   ├── state/
 │   │   ├── snapshots/
 │   │   ├── tests/
@@ -2279,8 +2260,8 @@ boros/
 │   │   ├── skill.json
 │   │   ├── functions/
 │   │   │   ├── __init__.py
-│   │   │   ├── comm_format.py
-│   │   │   └── comm_respond.py
+│   │   │   ├── comm_broadcast.py
+│   │   │   └── comm_listen.py
 │   │   ├── state/
 │   │   ├── snapshots/
 │   │   ├── tests/
@@ -2289,18 +2270,18 @@ boros/
 │   │   │   └── metrics.jsonl
 │   │   └── changelog.md
 │   │
-│   ├── research/
+│   ├── web-research/
 │   │   ├── SKILL.md
 │   │   ├── skill.json
 │   │   ├── functions/
 │   │   │   ├── __init__.py
-│   │   │   ├── research_search.py
-│   │   │   ├── research_evaluate.py
-│   │   │   └── research_synthesize.py
+│   │   │   ├── research_browse.py
+│   │   │   ├── research_search_engine.py
+│   │   │   └── research_archive_source.py
 │   │   ├── state/
 │   │   ├── snapshots/
 │   │   ├── tests/
-│   │   │   └── test_research.py
+│   │   │   └── test_web_research.py
 │   │   ├── metrics/
 │   │   │   └── metrics.jsonl
 │   │   └── changelog.md

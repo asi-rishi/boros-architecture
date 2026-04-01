@@ -201,7 +201,7 @@ Example: `boros inject "your last 3 proposals to reasoning/SKILL.md all failed �
 
 **Evolution records as compounding memory.** After each eval, records are backfilled with real scores. REFLECT searches these records to engineer smarter blueprints. Random runtime bugs become targeted architectural deployments. 
 
-**High-water marks and regression protection.** Each category has a best-ever score. If a Python code compilation breaks, or an architectural capability induces a score regression > 0.02 point, the `Skill Forge` rolls the directory back instantly.
+**High-water marks and regression protection.** Each category has a best-ever score. If a Python code compilation breaks, or an architectural capability induces a score regression beyond the adaptive threshold (0.05 early → 0.03 mid → 0.02 late), the `Skill Forge` rolls the directory back instantly.
 
 **Meta-Evaluation Code Review.** An independent LLM (e.g., GPT-4o) evaluates Boros's code diffs. A python `while` loop that looks logically sound to Claude might get rejected by GPT for memory-leaking potentials.
 

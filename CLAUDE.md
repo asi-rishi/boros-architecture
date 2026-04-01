@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The system starts minimal and improves itself by rewriting its own skill files, testing changes, scoring results, and rolling back regressions — all autonomously.
 
-**Current status (2026-03-31):** Architecture complete and verified. All 13 pre-build issues resolved in both `Boros.md` (spec) and `Seed-skills.md` (implementation). Seed skill SKILL.md files (`04-memory-SKILL.md`, `06-context-orchestration-SKILL.md`, `08-meta-evolution-SKILL.md`, `09-meta-evaluation-SKILL.md`) verified accurate. Ready for Phase 1 build. Implementation follows the 8-phase build order in `build-order.md`.
+**Current status (2026-04-01):** Architecture complete and verified. All 13 pre-build issues resolved. The system has been refactored to the **Unconstrained Autonomy** architecture — skills have been redesigned with expanded capabilities (SOTA tiered memory, unconstrained tool routing, P2P communication, surgical diff editing). `Universal-Skills.md` is the single source of truth for all 19 skill definitions. Individual SKILL.md files in `skills/` are verified accurate. Ready for Phase 1 build. Implementation follows the 8-phase build order in `build-order.md`.
 
 ## Model Configuration & Cost
 
@@ -70,21 +70,23 @@ The LLM controls stage transitions by calling Loop Orchestrator tools. When `loo
 
 19 skills in two categories:
 
+**Pre-boot** (not health-checked):
+- Director Interface (#01) — terminal UI (prompt_toolkit + rich)
+
 **Boot Skills** (strict load order, health_check on each — failure halts boot):
-1. Director Interface (#0, pre-boot) — terminal UI (prompt_toolkit + rich), NOT health-checked
-2. Mode Controller (#1)
-3. Temporal Consciousness (#2)
-4. Identity (#3)
-5. Memory (#4)
-6. Skill Router (#5)
-7. Context Orchestration (#6)
-8. Reflection (#7)
-9. Meta-Evolution (#8)
-10. Meta-Evaluation (#9)
-11. Loop Orchestrator (#10)
+1. Mode Controller (#02)
+2. Temporal Consciousness (#03)
+3. Identity (#00)
+4. Memory (#04)
+5. Skill Router (#05)
+6. Context Orchestration (#06)
+7. Reflection (#07)
+8. Meta-Evolution (#08)
+9. Meta-Evaluation (#09)
+10. Loop Orchestrator (#10)
 
 **Demand Skills** (loaded as needed):
-Skill Forge, Mission, Reasoning, Attention, Tool Use, Communication, Research, Eval Bridge
+Skill Forge (#11), Mission Control (#12), Reasoning (#13), Tool Use (#14), Communication (#15), Web Research (#16), Eval Bridge (#17), Scratchpad (#18)
 
 Each skill: `boros/skills/<skill-name>/SKILL.md` + `skill.json` + `state/` + `functions/` + `tests/` + `snapshots/` + `metrics/metrics.jsonl` + `changelog.md`
 
@@ -94,7 +96,7 @@ Each skill: `boros/skills/<skill-name>/SKILL.md` + `skill.json` + `state/` + `fu
 
 **Evolution Loop** (default): `REFLECT → EVOLVE → EVAL`
 - REFLECT: analyze score history, find weakest category, write hypothesis (`reflection_write_hypothesis` — hard gate, EVOLVE cannot start without it)
-- EVOLVE: translate hypothesis into a SKILL.md edit, snapshot, validate, test, GPT-4o review, apply or reject
+- EVOLVE: translate hypothesis into a SKILL.md edit or raw Python code patch, snapshot, validate, test, GPT-4o review, apply or reject
 - EVAL: Eval Generator tests Boros, scores flow back, backfill records, regression check, update high-water marks
 
 **Work Loop**: `RECEIVE → PLAN → EXECUTE → DELIVER → LEARN`
@@ -112,7 +114,7 @@ Five blocks, joined by `\n\n`:
 
 ### Evaluation System
 
-`world_model.json` — 12 categories, all weight 1.0: Instruction Following, Reasoning Depth, Memory Coherence, Adaptability, Metacognition, Temporal Awareness, Learning Velocity, Goal Coherence, Communication Quality, Integration, Research Quality, Task Execution.
+`world_model.json` — 10 categories (three at weight 1.2, seven at weight 1.0): Self-Model Fidelity, Epistemic Calibration, Reasoning Architecture, Complexity Navigation, Domain Snap, Hypothesis Engine, Generative Depth, Execution Reliability, Adversarial Robustness, Coherence Under Load. Composite denominator: 10.6.
 
 Ships pre-filled. Eval Generator needs rubrics on cycle 1. Director edits `world_model.json` directly. Boros sees category names/descriptions/scores but NOT rubrics, weights, or test questions. Changing a category's definition resets its high-water mark.
 
@@ -146,7 +148,7 @@ High-water marks: `skills/eval-bridge/state/high_water_marks.json`. Auto-rollbac
 
 These decisions resolve architectural issues found during pre-build audit. **Implement 25 and 26 first — they are prerequisites for all others.**
 
-All 13 issues are resolved in `Boros.md` (spec) and `Seed-skills.md` (implementation). The standalone SKILL.md files (`04-`, `06-`, `08-`, `09-`) are verified accurate.
+All 13 issues are resolved in `Boros.md` (spec) and `Universal-Skills.md` (implementation). The standalone SKILL.md files in `skills/` are verified accurate.
 
 ### Decision 25 — Eval Generator Subprocess (ISSUE-001, Fatal)
 
@@ -236,13 +238,13 @@ Proposal field renamed from `test_results` → `baseline_test_results`. Meta-eva
 
 ## Seed Skills — Implementation Notes
 
-Four seed skills are hand-written in `Seed-skills.md` and their standalone SKILL.md files. These are copied verbatim during Phase 1 build. The Python implementations in `Seed-skills.md` contain all fixes from Decisions 25–35.
+Four seed skills are hand-written in `Universal-Skills.md` and their standalone SKILL.md files in `skills/`. These are copied verbatim during Phase 1 build. The Python implementations contain all fixes from Decisions 25–35.
 
-**Seed skill files (verified accurate as of 2026-03-31):**
-- `04-memory-SKILL.md` — Memory skill instructions
-- `06-context-orchestration-SKILL.md` — Context Orchestration (includes `content` field contract, budget profiles, director injections)
-- `08-meta-evolution-SKILL.md` — Meta-Evolution (full evolve_propose signature with `proposed_skillmd` and `target_category`)
-- `09-meta-evaluation-SKILL.md` — Meta-Evaluation (correct dimensions, Infrastructure Failure Policy)
+**Seed skill files (verified accurate as of 2026-04-01):**
+- `04-memory-SKILL.md` — SOTA Tiered Memory with paging (page_in, page_out, search_sql, commit_archival)
+- `06-context-orchestration-SKILL.md` — Lean OS-Style loader with Associative Whisper
+- `08-meta-evolution-SKILL.md` — Full SWE Editor (evolve_propose with proposed_skillmd and target_category)
+- `09-meta-evaluation-SKILL.md` — Aggressive Code Review Board (correct dimensions, Infrastructure Failure Policy)
 
 **Key corrections applied to `Seed-skills.md` during pre-build audit:**
 
@@ -275,11 +277,10 @@ Four seed skills are hand-written in `Seed-skills.md` and their standalone SKILL
 
 ## Key Reference Files
 
+- `Universal-Skills.md` — **single source of truth** for all 19 skill definitions, function signatures, and state schemas
 - `build-order.md` — 8-phase implementation plan with executable bash acceptance tests per phase
 - `pipeline.md` — complete runtime behavior: boot, cycle mechanics, error recovery, stage transitions
-- `Skill-reference.md` — function signatures and state schemas for all 15 non-seed skills
-- `Seed-skills.md` — production-ready implementations for Memory, Meta-Evolution, Meta-Evaluation, Context Orchestration (copy verbatim; all issue fixes applied)
 - `decisions.md` — all 35 architectural decisions; decisions 25–35 are the 13 gap fixes
-- `Boros.md` — exhaustive system specification (~95KB); authoritative source of truth
-- `ISSUES.md` — 13 pre-build issues with severity and resolution pointers (all resolved)
-- `world-model.json` — 12 scoring categories with rubrics (ships pre-filled)
+- `Boros.md` — exhaustive system specification (~100KB)
+- `ISSUES.md` — 13 pre-build issues with severity and resolution pointers (all resolved, archived)
+- `world_model.json` — 10 scoring categories with rubrics (ships pre-filled)
