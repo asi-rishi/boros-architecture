@@ -301,28 +301,59 @@ Editable by Boros (changes go through Meta-Evaluation review).
   "version": "1.0.0",
   "mode": "evolution",
   "llm": {
-    "primary": {
-      "provider": "anthropic",
-      "model": "claude-haiku-4-5-20251001",
-      "max_tokens": 8192,
-      "temperature": 1.0
-    },
-    "meta_eval": {
-      "provider": "openai",
-      "model": "gpt-4o"
-    },
-    "eval_generator": {
-      "provider": "openai",
-      "model": "gpt-4o"
-    }
-  },
-  "_llm_provider_examples": {
-    "_note": "This field is documentation only — delete before use. Any role (primary, meta_eval, eval_generator) accepts any provider below.",
-    "anthropic": { "provider": "anthropic", "model": "claude-sonnet-4-20250514" },
-    "openai": { "provider": "openai", "model": "gpt-4o" },
-    "ollama": { "provider": "ollama", "model": "llama3", "base_url": "http://localhost:11434" },
-    "openai_compat": { "provider": "openai_compat", "model": "mistral-7b", "base_url": "https://api.together.xyz/v1", "api_key_env": "TOGETHER_API_KEY" },
-    "gemini": { "provider": "gemini", "model": "gemini-1.5-pro" }
+    "primary": [
+      {
+        "provider": "anthropic",
+        "model": "claude-haiku-4-5-20251001",
+        "max_tokens": 8192,
+        "temperature": 1.0
+      },
+      {
+        "provider": "gemini",
+        "model": "gemini-1.5-pro",
+        "temperature": 1.0
+      },
+      {
+        "provider": "openai",
+        "model": "gpt-4o",
+        "temperature": 1.0
+      },
+      {
+        "provider": "ollama",
+        "model": "llama3",
+        "base_url": "http://localhost:11434"
+      },
+      {
+        "provider": "openai_compat",
+        "model": "mistral-7b",
+        "base_url": "https://api.together.xyz/v1",
+        "api_key_env": "TOGETHER_API_KEY"
+      }
+    ],
+    "meta_eval": [
+      {
+        "provider": "openai",
+        "model": "gpt-4o"
+      },
+      {
+        "provider": "anthropic",
+        "model": "claude-3-5-sonnet-20241022"
+      },
+      {
+        "provider": "gemini",
+        "model": "gemini-1.5-pro"
+      }
+    ],
+    "eval_generator": [
+      {
+        "provider": "openai",
+        "model": "gpt-4o"
+      },
+      {
+        "provider": "anthropic",
+        "model": "claude-3-5-sonnet-20241022"
+      }
+    ]
   },
   "boot_sequence": [
     "mode-controller",
