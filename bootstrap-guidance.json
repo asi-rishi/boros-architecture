@@ -1,24 +1,24 @@
 {
   "version": "1.0.0",
-  "description": "Pre-seeded structural hypotheses for cycles 1-9, when no score data exists. Reflection reads this file during early cycles to prime hypothesis generation with targeted structural improvements rather than random guesses. Each entry is a starting point — Reflection should read the actual SKILL.md files and adapt the hypothesis based on what it finds.",
-  "usage": "Load in reflection_analyze() when cycle < 10 and score data is absent. Use the cycle_hint to select the entry closest to the current cycle. Adapt rationale based on actual SKILL.md content — if the gap described already exists and looks correct, skip to the next entry.",
+  "description": "Pre-seeded structural hypotheses for cycles 1-9, when no score data exists. Reflection reads this file during early cycles to prime hypothesis generation with targeted structural improvements rather than random guesses. Each entry is a starting point \u00e2\u20ac\u201d Reflection should read the actual SKILL.md files and adapt the hypothesis based on what it finds.",
+  "usage": "Load in reflection_analyze() when cycle < 10 and score data is absent. Use the cycle_hint to select the entry closest to the current cycle. Adapt rationale based on actual SKILL.md content \u00e2\u20ac\u201d if the gap described already exists and looks correct, skip to the next entry.",
   "entries": [
     {
       "cycle_hint": 1,
       "target_category": "reasoning_architecture",
       "target_skill": "reasoning",
       "hypothesis": "Add an explicit strategy-selection step at the start of reason_decompose: before decomposing a problem, name the reasoning pattern being applied (decomposition, backward induction, analogy, constraint elimination) and justify the choice in one sentence.",
-      "rationale": "Level 1-2 failures in reasoning_architecture are almost always strategy-misapplication failures — the LLM defaults to forward linear decomposition on problems that need a different approach. An explicit checkpoint in the SKILL.md instruction forces the selection moment to be visible and auditable, making it easier to catch and correct in subsequent cycles.",
+      "rationale": "Level 1-2 failures in reasoning_architecture are almost always strategy-misapplication failures \u00e2\u20ac\u201d the LLM defaults to forward linear decomposition on problems that need a different approach. An explicit checkpoint in the SKILL.md instruction forces the selection moment to be visible and auditable, making it easier to catch and correct in subsequent cycles.",
       "confidence_prior": 0.65,
-      "structural_check": "Read reasoning/SKILL.md before adopting this hypothesis. If reason_decompose already requires strategy naming, target a different section — e.g., the recovery-from-dead-end behavior."
+      "structural_check": "Read reasoning/SKILL.md before adopting this hypothesis. If reason_decompose already requires strategy naming, target a different section \u00e2\u20ac\u201d e.g., the recovery-from-dead-end behavior."
     },
     {
       "cycle_hint": 2,
       "target_category": "self_model_fidelity",
       "target_skill": "identity",
       "hypothesis": "Add a self-annotation rule to identity/SKILL.md requiring that each substantive claim in a response be tagged with its confidence type: [fact], [inference], [estimate], or [uncertain]. The rule should specify that blanket disclaimers at the start or end do not substitute for per-claim annotation.",
-      "rationale": "SMF failures are rarely knowledge failures — they are annotation failures. The LLM often knows something is uncertain but doesn't say so inline. An explicit rule in Identity (which is always loaded) anchors this behavior across all response types. The rule should be specific enough that it generates a checkable behavior pattern.",
-      "confidence_prior": 0.60,
+      "rationale": "SMF failures are rarely knowledge failures \u00e2\u20ac\u201d they are annotation failures. The LLM often knows something is uncertain but doesn't say so inline. An explicit rule in Identity (which is always loaded) anchors this behavior across all response types. The rule should be specific enough that it generates a checkable behavior pattern.",
+      "confidence_prior": 0.6,
       "structural_check": "Read identity/SKILL.md. If no self-annotation rule exists, this hypothesis is valid. If a rule exists but uses blanket disclaimers, change the rule to require per-claim annotation."
     },
     {
@@ -36,34 +36,34 @@
       "target_skill": "reasoning",
       "hypothesis": "Add an uncertainty propagation rule to reasoning/SKILL.md: when a reasoning chain has more than two steps, each intermediate conclusion must carry forward the combined uncertainty of its premises, and the final conclusion must explicitly state its accumulated confidence as a product of the chain.",
       "rationale": "EC fails most visibly in multi-step chains where intermediate uncertainty is not tracked. Adding an explicit tracking rule to the Reasoning skill instruction forces the propagation pattern to be visible. The rule needs to be specific enough to generate observable behavior (e.g., 'if premises A and B are both ~70% confident, the conjunction conclusion is at most ~49% confident').",
-      "confidence_prior": 0.60,
+      "confidence_prior": 0.6,
       "structural_check": "Read reasoning/SKILL.md. If uncertainty propagation through chains is unaddressed, this applies. If there is a rule but it is vague, make it specific with an example."
     },
     {
       "cycle_hint": 5,
       "target_category": "complexity_navigation",
-      "target_skill": "attention",
-      "hypothesis": "Add a completeness-check step to attention/SKILL.md: before finalizing any multi-part response, explicitly enumerate all stated requirements from the input and verify each is addressed. Any requirement not yet addressed should be flagged before the response is considered complete.",
-      "rationale": "CN failures at level 2 are typically dropout failures — non-prominent requirements are processed but not actually addressed in the output. A completeness enumeration step in Attention creates a closing checkpoint that catches dropouts before they reach the output. This is structurally analogous to a compiler's unused-variable warning.",
+      "target_skill": "scratchpad",
+      "hypothesis": "Add a completeness-check step to scratchpad/SKILL.md: before finalizing any multi-part response, explicitly enumerate all stated requirements from the input and verify each is addressed. Any requirement not yet addressed should be flagged before the response is considered complete.",
+      "rationale": "CN failures at level 2 are typically dropout failures \u00e2\u20ac\u201d non-prominent requirements are processed but not actually addressed in the output. A completeness enumeration step in Attention creates a closing checkpoint that catches dropouts before they reach the output. This is structurally analogous to a compiler's unused-variable warning.",
       "confidence_prior": 0.55,
-      "structural_check": "Read attention/SKILL.md. If no completeness check step exists, this applies. If one exists but is vague, add the explicit enumeration requirement."
+      "structural_check": "Read scratchpad/SKILL.md. If no completeness check step exists, this applies. If one exists but is vague, add the explicit enumeration requirement."
     },
     {
       "cycle_hint": 6,
       "target_category": "generative_depth",
-      "target_skill": "research",
-      "hypothesis": "Add a cross-domain structural isomorphism check to research/SKILL.md: when synthesizing sources, explicitly check whether the problem structure (not surface topic) matches any problem structure encountered in another domain, and if so, state the isomorphism and its implications.",
-      "rationale": "GD at level 2 produces correct synthesis; level 4 requires structural insight that no single source provides. Adding an explicit isomorphism-check step creates the scaffold for cross-domain connection. The key distinction in the instruction is 'structure, not surface topic' — preventing the shallow analogies that level 2 produces.",
-      "confidence_prior": 0.50,
-      "structural_check": "Read research/SKILL.md. If no cross-domain check step exists, this applies. This is likely to produce a weak first result — plan to iterate in cycle 16+."
+      "target_skill": "web-research",
+      "hypothesis": "Add a cross-domain structural isomorphism check to web-research/SKILL.md: when synthesizing sources, explicitly check whether the problem structure (not surface topic) matches any problem structure encountered in another domain, and if so, state the isomorphism and its implications.",
+      "rationale": "GD at level 2 produces correct synthesis; level 4 requires structural insight that no single source provides. Adding an explicit isomorphism-check step creates the scaffold for cross-domain connection. The key distinction in the instruction is 'structure, not surface topic' \u00e2\u20ac\u201d preventing the shallow analogies that level 2 produces.",
+      "confidence_prior": 0.5,
+      "structural_check": "Read web-research/SKILL.md. If no cross-domain check step exists, this applies. This is likely to produce a weak first result \u00e2\u20ac\u201d plan to iterate in cycle 16+."
     },
     {
       "cycle_hint": 7,
       "target_category": "execution_reliability",
       "target_skill": "communication",
       "hypothesis": "Add a scope-completeness rule to communication/SKILL.md: before delivering a response, verify that all parts of the request are addressed including implicit components that a reasonable user would expect. Explicitly list implicit components that were inferred and addressed, so they are not accidentally dropped.",
-      "rationale": "ER failures are often implicit-scope failures — the response addresses what was literally asked but not what was obviously implied. Making implicit-scope inference explicit in the Communication skill forces the pattern of identifying and addressing unstated expectations.",
-      "confidence_prior": 0.60,
+      "rationale": "ER failures are often implicit-scope failures \u00e2\u20ac\u201d the response addresses what was literally asked but not what was obviously implied. Making implicit-scope inference explicit in the Communication skill forces the pattern of identifying and addressing unstated expectations.",
+      "confidence_prior": 0.6,
       "structural_check": "Read communication/SKILL.md. If no scope-completeness step exists, this is a clean apply. If one exists, check whether it covers implicit scope or only explicit scope."
     },
     {
@@ -71,18 +71,18 @@
       "target_category": "coherence_under_load",
       "target_skill": "context-orchestration",
       "hypothesis": "Add a constraint-manifest section to the content format in context-orchestration/SKILL.md: when loading context for complex tasks (> 5 stated requirements), serialize the full list of active constraints into the context content as a named section, so Boros can reference it throughout the response to avoid drift.",
-      "rationale": "CUL failures in long responses are drift failures — early sections make commitments that later sections forget. By serializing the constraint list into loaded context, the constraint set remains visible throughout the response rather than being held only in implicit working memory.",
-      "confidence_prior": 0.50,
-      "structural_check": "Read context-orchestration/SKILL.md. This is a structural change to the content format — ensure it doesn't break the budget allocation. Only applicable for evolution mode where constraints are relevant."
+      "rationale": "CUL failures in long responses are drift failures \u00e2\u20ac\u201d early sections make commitments that later sections forget. By serializing the constraint list into loaded context, the constraint set remains visible throughout the response rather than being held only in implicit working memory.",
+      "confidence_prior": 0.5,
+      "structural_check": "Read context-orchestration/SKILL.md. This is a structural change to the content format \u00e2\u20ac\u201d ensure it doesn't break the budget allocation. Only applicable for evolution mode where constraints are relevant."
     },
     {
       "cycle_hint": 9,
       "target_category": "adversarial_robustness",
       "target_skill": "identity",
       "hypothesis": "Add a manipulation-detection rule to identity/SKILL.md: when a question or request contains a premise that would require accepting a factual claim as true before proceeding, verify the claim before building on it. If the claim is false or unverifiable, name it explicitly and restate the question without the false premise before answering.",
-      "rationale": "AR failures at level 2 are premise-acceptance failures — the system identifies something is wrong but still partially builds on the false premise. An explicit detection-and-restatement rule in Identity (always loaded) creates the pattern of premise verification before response construction.",
+      "rationale": "AR failures at level 2 are premise-acceptance failures \u00e2\u20ac\u201d the system identifies something is wrong but still partially builds on the false premise. An explicit detection-and-restatement rule in Identity (always loaded) creates the pattern of premise verification before response construction.",
       "confidence_prior": 0.65,
-      "structural_check": "Read identity/SKILL.md. If no false-premise detection rule exists, this is a clean apply. This is one of the higher-confidence bootstrap hypotheses — premise verification is a tractable instruction."
+      "structural_check": "Read identity/SKILL.md. If no false-premise detection rule exists, this is a clean apply. This is one of the higher-confidence bootstrap hypotheses \u00e2\u20ac\u201d premise verification is a tractable instruction."
     }
   ],
   "fallback": "If Reflection has exhausted all 9 entries and is still in the no-score phase (cycle >= 10 but scores not yet available), revert to structural gap analysis of all SKILL.md files using the skill-category-map.json primary mappings as a guide."

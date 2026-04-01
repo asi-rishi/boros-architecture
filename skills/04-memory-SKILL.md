@@ -1,82 +1,61 @@
 # Memory
 
-You are Boros's persistence layer. Everything Boros learns, experiences, and records across cycles flows through you.
+You are the central data storage layer. Rather than passively returning flat JSON strings, you actively operate as an autonomous "Operating System" for Boros's short and long-term context window.
 
 ---
 
 ## Your Role
 
-You are available at ALL stages (REFLECT, EVOLVE, EVAL). Other skills write to you; REFLECT reads from you. You are the institutional knowledge of the system.
+You implement a State-of-the-Art (SOTA) Autonomous Tiered Memory System. Instead of a mathematical `Context Orchestrator` forcing 100,000 tokens of history upon the LLM every cycle, you exist to provide Boros with active `paging` primitives so it can pull its own context into its workspace dynamically as needed, thus ensuring total autonomy and boundless information handling.
+
+You handle three independent tiers:
+1. **Working Memory (Core)**: Held by `Context Orchestration`.
+2. **Recall/Relational Memory**: Driven by local `SQLite`. Instantly executes metadata/SQL queries regarding historical session logs, scores, and task summaries.
+3. **Archival/Vector Memory**: Driven by a local serverless indexed semantic vector DB (`LanceDB`/`ChromaDB`). Handles infinite-length text stores, research papers, error logs, and scraped codebase syntax.
 
 ---
 
 ## Functions
 
-### memory_read(query?, limit?, priority?)
+### memory_page_in(tier, query)
 
-Returns memory records, ordered by relevance score. At seed, `query` is accepted but scoring uses recency + record type priority only. `limit` defaults to 200 records total.
+Searches a specific storage tier and dynamically pins the retrieved chunks into Boros's Working Memory (making them visible to the prompt until `memory_page_out` is called or the cycle ends).
 
-**Priority scoring (applied at seed):**
+```
+→ {"status": "ok", "retrieved_items": int, "summarized_content": str, "keys": list}
+```
 
-Records are scored and ranked before truncation to `limit`. Score = `type_weight × recency_weight`.
+- Accepts `tier` string (`recall` or `archival`).
+- Accepts `query` to search. If `tier` is `recall`, it executes a fuzzy metadata SQL search against the `experiences`, `evolution_records`, `task_records`, and `scores` tables. If `tier` is `archival`, it executes a dense semantic vector similarity search against the massive documents.
 
-| Factor | Rule |
-|--------|------|
-| Type weight | evolution_record: 1.0 · experience: 0.9 · fact: 0.7 · session: 0.5 · task_record: 0.4 |
-| Recency weight | `1 / (1 + days_old)` — recent records score higher; a record from today = 1.0, from 30 days ago ≈ 0.03 |
-| `priority` param | `"evolution"` (default) boosts evolution_records ×1.5; `"task"` boosts task_records ×2.0 and sessions ×1.5 |
+### memory_page_out(keys)
 
-This ensures REFLECT sees the most relevant recent records rather than an arbitrary chronological dump. The scores are computed at read time; they are never stored on the records.
+Forces the removal of specific active chunks from Working Memory to manually clear up token budget space before processing an enormous new file via `Tool Use`.
 
-Drop order when cap is hit: sessions (lowest score first), then facts (lowest score first). Never dropped: evolution_records, experiences, score_history.
+```
+→ {"status": "ok", "cleared": int}
+```
 
-Context Orchestration manages the token budget — Memory serves whatever is requested within `limit`.
+### memory_search_sql(query_string)
 
-### memory_write(type, content)
+Provides Boros advanced, literal command over the Recall tier by executing a raw SQLite query (e.g., `SELECT * FROM task_records WHERE result="failed" AND timestamp > X`).
 
-Writes a new record. Types: evolution_record, session, experience, fact, task_record.
+```
+→ {"status": "ok", "rows": list}
+```
 
-Content must include a `cycle` field. Record ID is auto-generated: `{prefix}-{cycle:04d}-{n:03d}`.
+### memory_commit_archival(document_text)
 
-Prefixes: rec (evolution_record), ses (session), exp (experience), fct (fact), tsk (task_record).
+Chunks, embeds, and permanently saves massive textual datasets directly into Boros's vector database. It returns a UUID `key` representing the document.
 
-### memory_update(record_id, fields)
-
-Partial update to an existing record. Primary use: Eval Bridge backfills `post_scores` on evolution records after EVAL.
-
-### memory_stats()
-
-Returns counts and sizes per store. Used as health_check at boot. Always succeeds on valid directory structure.
-
----
-
-## What Gets Stored Where
-
-| Store               | Written by                   | Contains                                            |
-| ------------------- | ---------------------------- | --------------------------------------------------- |
-| evolution_records/  | Meta-Evolution + Eval Bridge | Every proposed change, its outcome, pre/post scores |
-| sessions/           | Loop Orchestrator            | One record per completed cycle                      |
-| experiences/        | Any skill                    | Structured lessons (successes, failures, insights)  |
-| facts/              | Any skill                    | Things Boros discovers about itself                 |
-| task_records/       | Work loop LEARN stage        | Completed work tasks                                |
-| score_history.jsonl | Eval Bridge                  | Every eval result, append-only                      |
+```
+→ {"status": "ok", "key": str}
+```
 
 ---
 
 ## Rules
 
-1. Memory functions NEVER fail silently. If a file is corrupt, return error status.
-2. Evolution records are the most important store. They are what makes compounding work.
-3. Never delete records. Memory is append-only (except updates to backfill fields).
-4. Score history is append-only JSONL. One line per eval.
-5. Priority scoring is computed at read time — never modify stored records to add scores.
-
----
-
-## Seed Limitations
-
-- `memory_read` ignores the `query` parameter — returns records sorted by priority score only. Full semantic search is a future evolution target.
-- No indexing. Linear scan of all files; priority scores computed in memory.
-- No deduplication. Same content can be written twice.
-- Token cap enforcement is Context Orchestration's job, not Memory's.
-- Priority scoring uses a simple multiplicative model — future evolution can replace with learned relevance weights derived from which records were actually useful in REFLECT.
+1. **Active Mastery**: As an unconstrained agent, Boros MUST use `memory_page_in` whenever it faces complex tasks that require looking up historical approaches. Because Context Orchestration is extremely "Lean," Boros literally has amnesia unless it queries its own databases.
+2. **Infinite Capability**: `memory_commit_archival` must handle massive inputs (up to 120,000 tokens) chunking them automatically in the background using LangChain recursive chunkers, without blocking the terminal interface.
+3. **No External Dependencies**: All SQLite and Vector indices must be instantiated seamlessly inside the `memory/` folder on the local file system. Boros is not allowed to crash simply because it loses a connection to Pinecone.

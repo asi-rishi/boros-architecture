@@ -59,8 +59,8 @@ boros>
 **Mechanics:**
 
 1. Context Orchestration fires (`context_load`) — builds context window per budget profile
-2. Skill Router provides REFLECT-stage tools only
-3. LLM API call with system prompt + context + REFLECT tools
+2. Skill Router provides entire unbounded global toolset
+3. LLM API call with system prompt + minimal working core + ALL tools
 4. LLM reasons about scores and patterns, calls `reflection_analyze()`
 5. LLM must call `reflection_write_hypothesis()` — **hard gate**, EVOLVE cannot start without it
 6. If hypothesis doesn't exist after REFLECT, one retry. Still missing = cycle logged as failed, fresh cycle starts.
@@ -69,7 +69,7 @@ boros>
 
 ```
 [C001] EVOLVE starting...
-  → Skill Router swaps tools (EVOLVE tools now available)
+  → (All tools remain globally available, stage advancement merely updates system core status)
   → LLM loads hypothesis from session/hypothesis.json
   → LLM calls evolve_orient() — no scores yet, returns guidance
   → LLM calls evolve_set_target(category="self_model_fidelity", delta=0.05)
@@ -86,7 +86,7 @@ boros>
 
 **Mechanics:**
 
-1. Skill Router swaps to EVOLVE tools (Meta-Evolution, Meta-Evaluation, Skill Forge now available)
+1. LLM continues reasoning with the global unbounded toolset
 2. Conversation history carries forward from REFLECT
 3. LLM loads hypothesis from session state
 4. Per proposal:

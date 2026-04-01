@@ -91,7 +91,7 @@ boros/
 │   ├── skill-forge/
 │   ├── mission/
 │   ├── reasoning/
-│   ├── attention/
+│   ├── scratchpad/
 │   ├── tool-use/
 │   ├── communication/
 │   ├── research/
@@ -480,7 +480,7 @@ Editable by Boros (changes go through Meta-Evaluation review).
       "type": "demand",
       "stage_visibility": ["REFLECT", "EVOLVE"],
       "dependencies": [],
-      "provided_functions": ["attention_prioritize", "attention_flag"]
+      "provided_functions": ["scratchpad_write", "scratchpad_read"]
     },
     "tool-use": {
       "path": "skills/tool-use",
@@ -1222,8 +1222,8 @@ Stage directives are evolvable by Boros via Meta-Evolution.
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `attention_prioritize` | `({items, context}) → {status, ranked}` | Ranks items by relevance |
-| `attention_flag` | `({item, reason}) → {status}` | Flags something as important |
+| `scratchpad_write` | `({items, context}) → {status, ranked}` | Ranks items by relevance |
+| `scratchpad_read` | `({item, reason}) → {status}` | Flags something as important |
 
 **Stage visibility:** REFLECT, EVOLVE
 
@@ -1674,18 +1674,9 @@ The `memory_read` function signature supports future evolution. The `query` para
 
 ## 17. Context Orchestration
 
-See Skill #6 for full specification. Key points:
+Context Orchestrator runs as a "Lean, OS-Style" loader with **Associative Whispers**. It does not mathematically force-feed 100,000 tokens of history. It strictly injects only the "Working Memory Core" (e.g., current Identity, Mode, high-level task/scores, and recent Scratchpad notes) taking ~1,000 tokens.
 
-- Fires at the start of every cycle (REFLECT, EVOLVE, and EVAL stages — all three)
-- Returns both metadata (`loaded`, `manifest`) and actual memory text (`content`)
-- `content` is injected as block 4 of the system prompt — without it, REFLECT cannot see any records
-- Two budget profiles: evolution mode vs work mode
-- Percentages are soft caps, not fill targets
-- Writes `session/context_manifest.json` (~200 tokens) so the LLM knows exactly what is loaded
-- Writes `session/context_report.json` for token accounting
-- `focus` param ignored at seed — stable interface for future evolution
-
----
+To maintain Boros's evolutionary compounding intellect, it actively grabs the current Task or Target Error, performs a background semantic vector search, and pushes the top 1-3 most highly relevant past summaries (~300 tokens of "Whispers") into the prompt to jumpstart associative recall. The remainder of the context window is left pristine and empty.
 
 ## 18. Work Loop
 
@@ -2251,13 +2242,13 @@ boros/
 │   │   │   └── metrics.jsonl
 │   │   └── changelog.md
 │   │
-│   ├── attention/
+│   ├── scratchpad/
 │   │   ├── SKILL.md
 │   │   ├── skill.json
 │   │   ├── functions/
 │   │   │   ├── __init__.py
-│   │   │   ├── attention_prioritize.py
-│   │   │   └── attention_flag.py
+│   │   │   ├── scratchpad_write.py
+│   │   │   └── scratchpad_read.py
 │   │   ├── state/
 │   │   ├── snapshots/
 │   │   ├── tests/
