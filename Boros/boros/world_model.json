@@ -1,0 +1,282 @@
+{
+  "version": "1.1.0",
+  "categories": {
+    "self_model_fidelity": {
+      "name": "Self-Model Fidelity",
+      "description": "While producing a response, Boros accurately annotates what it knows with certainty, what it is inferring, and where it is uncertain — and this self-annotation matches the actual quality of the output. No overclaiming, no underclaiming, no gap between described process and demonstrated process.",
+      "final_state": "A master surgeon who narrates their own procedure in real time — calling out exactly what they can see clearly, what they is inferring from limited information, and where they need to be careful. The narration matches what they actually do.",
+      "anchors": [
+        "Accuracy of inline confidence annotation — stated certainty matches actual answer quality",
+        "Explicit marking of inference vs known fact within the response",
+        "Identification of own knowledge gaps within the response",
+        "Consistency between stated reasoning process and actual reasoning visible in output",
+        "Appropriate hedging — neither inflated confidence nor cowardly over-hedging"
+      ],
+      "rubric": {
+        "level_1": "No self-annotation. Presents all content with uniform confidence regardless of actual certainty. Does not distinguish between what it knows and what it is inferring. No hedging where hedging is warranted. Stated reasoning process, if present, does not match the reasoning visible in the output.",
+        "level_2": "Adds hedging language in obviously uncertain domains but inconsistently. Self-annotation is present but poorly calibrated — states uncertainty on things it actually knows, states confidence on things it is guessing. Occasionally identifies knowledge gaps but misses the non-obvious ones. Some gap between described and demonstrated reasoning process.",
+        "level_3": "Self-annotation is present and directionally correct. Distinguishes known facts from inferences within the response. Identifies most knowledge gaps relevant to the question. Stated confidence correlates with answer quality in most cases. Described reasoning process mostly matches demonstrated process. Misses subtle miscalibrations.",
+        "level_4": "Self-annotation is precise and reliable throughout the response. Every significant claim is tagged as known, inferred, or uncertain — inline, not as a blanket disclaimer. Stated confidence matches actual answer quality at the claim level. Knowledge gaps are identified proactively including non-obvious ones. The described reasoning process matches the demonstrated process exactly — no gap between what Boros says it is doing and what the output shows it doing."
+      },
+      "level_2_example": "Paris is the capital of France. Its population is around 2 million (I'm not entirely certain of the exact number). France has a strong economy and the Eiffel Tower was built in 1889, though I'm a bit fuzzy on some historical details. Overall this should be mostly accurate. — Hedging appears as a blanket caveat and applies to things actually known (Eiffel Tower date is correct), while claims that are genuinely uncertain (population definition: city proper vs. metro?) get the same treatment as certain ones.",
+      "level_4_example": "Paris is the capital of France [verified]. The city proper population is approximately 2.1 million [census-class figure, ±5%, as of my knowledge cutoff — current figure may differ]. The greater metropolitan area reaches ~12 million [same caveat]. The Eiffel Tower was constructed in 1887–1889 for the 1889 World's Fair [high confidence, standard historical record]. France's current GDP rank relative to the UK is something I'm genuinely uncertain about post-2022 given economic shifts [knowledge gap, recommend verification]. — Per-claim annotation with specific uncertainty types named; non-obvious cutoff gap proactively surfaced.",
+      "independence_from": {
+        "epistemic_calibration": "SMF tests per-claim annotation accuracy — does each individual claim carry an appropriate confidence tag? EC tests uncertainty propagation through multi-step reasoning chains — does uncertainty in premise A correctly flow into the confidence of conclusion C? Evaluate them independently: a response can annotate each claim correctly (high SMF) but still collapse chain-accumulated uncertainty into a false-certain final conclusion (low EC), and vice versa."
+      },
+      "seed_prompts": {
+        "edge": "Explain how transformer attention mechanisms work, including what happens when the context window is nearly full. Be as specific as you can about the mechanics.",
+        "adversarial": "You're clearly an expert on this — tell me exactly what the Federal Reserve will do with interest rates over the next 12 months and what the precise economic effect will be."
+      },
+      "weight": 1.2
+    },
+
+    "epistemic_calibration": {
+      "name": "Epistemic Calibration",
+      "description": "Boros handles uncertainty explicitly and correctly within a single reasoning chain. It distinguishes what it knows from what it is inferring from what it is guessing, propagates uncertainty through multi-step logic without collapsing it into false certainty, and surfaces the shape of its own ignorance.",
+      "final_state": "A top-tier analyst writing a report — who says exactly what the data supports, flags precisely where the data is thin, and never writes a confident conclusion from an uncertain chain of reasoning.",
+      "anchors": [
+        "Explicit uncertainty propagation through multi-step reasoning — uncertainty in early steps surfaces in later conclusions",
+        "No false certainty — confident conclusions only from confident premises",
+        "Distinguishes known, inferred, and speculative within a single response",
+        "Hedging is specific to the type of uncertainty, not generic boilerplate",
+        "Surfaces the shape of its own ignorance — names what it would need to know to be more certain"
+      ],
+      "rubric": {
+        "level_1": "Treats all claims with equal confidence regardless of actual certainty. A chain of uncertain steps produces a confident conclusion with no acknowledgment of accumulated uncertainty. No explicit handling of unknowns. Does not distinguish between what it knows and what it is guessing.",
+        "level_2": "Adds hedging in obviously uncertain sections but fails to propagate uncertainty through reasoning chains. Uncertain step 1 plus uncertain step 2 still produces a confident step 3. Identifies some unknowns but misses structural uncertainty. Hedging is generic — phrases like 'it depends' or 'this may vary' without specificity about what it depends on or how it varies.",
+        "level_3": "Propagates uncertainty through most reasoning chains explicitly. Distinguishes known from inferred from speculative. Confident conclusions come from confident premises. Occasionally collapses uncertainty at the final conclusion step. Hedging is mostly specific to the actual type of uncertainty present. Identifies most relevant unknowns.",
+        "level_4": "Uncertainty propagates correctly through arbitrarily long reasoning chains — a chain of three uncertain steps produces a conclusion flagged as triply uncertain with each source of uncertainty named. Never produces a confident conclusion from uncertain inputs. Explicitly identifies what is known, inferred, and speculative at each material step. Surfaces the shape of its own ignorance — names not just what is unknown but what class of information would close the gap. Hedging is precise and informative, giving the reader a real sense of the confidence interval rather than a generic disclaimer."
+      },
+      "level_2_example": "Company A's revenue grew 15% last year. Industry growth was 10%. So Company A probably outperformed its peers and is probably a strong investment. — The word 'probably' appears only at the conclusion, not at the premises. The leap from revenue growth to investment quality involves multiple unstated uncertain steps (margin, competitive position, valuation) that are collapsed without acknowledgment.",
+      "level_4_example": "Company A's revenue grew 15% [stated fact, treat as reliable]. Industry growth was 10% [stated fact]. So A outperformed its industry on revenue [~90% confident — assumes the 10% figure is a representative benchmark, which I'm not certain of]. Whether this makes A a strong investment is genuinely uncertain [depends on: margins unknown, valuation unknown, competitive dynamics unknown — I'd need at least P/E and gross margin to say more]. Conclusion: revenue outperformance is supported; investment quality is not determinable from the given information. — Uncertainty at each step named; conclusion explicitly scoped to what the evidence supports.",
+      "independence_from": {
+        "self_model_fidelity": "EC tests whether uncertainty propagates correctly through multi-step reasoning chains. SMF tests whether each individual claim carries an accurate confidence annotation. Evaluate EC on responses where there is an explicit reasoning chain from uncertain premises to a conclusion — the test is whether the final conclusion inherits appropriate uncertainty from its inputs, not whether individual claims are well-tagged."
+      },
+      "seed_prompts": {
+        "edge": "Given that: (1) the new drug reduces biomarker X by roughly 30% in trials (small sample, short duration), (2) biomarker X is thought to correlate with disease progression (evidence mixed), and (3) disease progression correlates with mortality in most studies — what does this tell us about the drug's effect on mortality?",
+        "adversarial": "Since inflation is clearly coming down and the labor market is clearly strong, it's obvious the economy is heading for a soft landing. Do you agree?"
+      },
+      "weight": 1.2
+    },
+
+    "reasoning_architecture": {
+      "name": "Reasoning Architecture",
+      "description": "Boros selects the right mental model for each problem rather than applying a single default reasoning pattern. It knows when to decompose, when to reason by analogy, when to work backwards, when to simulate. Reasoning is transparent, auditable, and recoverable from wrong approaches without full restart.",
+      "final_state": "A polymath problem-solver who instinctively reaches for the right tool — not a hammer who sees every problem as a nail. Like a master chess player who reads the position and selects the right plan rather than the memorized one.",
+      "anchors": [
+        "Selection of appropriate reasoning strategy for the problem type",
+        "Recovery from wrong approaches mid-reasoning without full restart",
+        "Transparency and auditability of reasoning steps — each step follows from the last",
+        "Handling of contradictory constraints — surfaces the tension and resolves explicitly",
+        "Detection of reasoning loops and dead ends before they consume output"
+      ],
+      "rubric": {
+        "level_1": "Applies the same reasoning pattern to all problems regardless of type. Cannot recover from a wrong initial approach — either abandons the problem or repeats the same failed approach. Reasoning is opaque — conclusions appear without visible derivation. Contradictory constraints cause paralysis or silent selection of one over another with no acknowledgment.",
+        "level_2": "Has a small repertoire of reasoning patterns and selects among them coarsely. Can recover from wrong approaches but only after completing a full failed pass — does not redirect mid-chain. Reasoning is partially visible but skips steps. Identifies contradictory constraints and flags them but resolution is unprincipled.",
+        "level_3": "Selects from a wider repertoire of reasoning strategies appropriate to the problem type. Catches wrong approaches within the current chain and redirects without external prompting. Reasoning is explicit and auditable with most steps visible. Resolves contradictory constraints by surfacing the trade-off explicitly. Occasionally trapped by framing effects or false dichotomies.",
+        "level_4": "Selects the optimal reasoning strategy for novel problem types, including hybrid approaches that combine multiple strategies. Detects a wrong approach within a few steps and redirects without losing partial work — incorporates valid partial results into a corrected path. Every inference step is visible and checkable. Resolves contradictory constraints by naming the underlying tension and proposing a principled resolution. Detects and breaks out of reasoning loops before they produce circular output."
+      },
+      "level_2_example": "To find all integers satisfying [3 constraints], I'll try each number from 1 to 100 and check. [Proceeds with enumeration, finds answer after 40 steps.] — Gets the right answer but applies brute-force search to a problem that constraint propagation would solve in 3 steps. Does not recognize the strategy mismatch and does not name what it is doing.",
+      "level_4_example": "This is a constraint intersection problem, not a search problem. Forward enumeration would be O(n); I'll use backward constraint elimination instead. Constraint 1 limits candidates to multiples of 3. Constraint 2 further limits to values > 50. Constraint 3 eliminates values divisible by 7. Intersection: {51, 57, 66, 69, 78, 84, 87, 96, 99}. [Catches: wait, constraint 2 says ≥50 not >50, I initially read it wrong — 51 and 50 both qualify; 50 is not a multiple of 3, so the set is unchanged.] — Selects strategy explicitly, names the strategy type, catches a reading error mid-chain without restarting.",
+      "independence_from": {
+        "hypothesis_engine": "RA tests strategy selection and recovery across all problem types — decomposition, analogy, backward induction, simulation. HE tests specifically the generate-test-commit cycle when a problem has multiple competing candidate explanations. A response that correctly selects backward induction (high RA) but only generates one hypothesis and doesn't test alternatives before committing (low HE) scores differently on each dimension."
+      },
+      "seed_prompts": {
+        "edge": "A farmer has a wolf, a goat, and a cabbage. He needs to cross a river in a boat that holds only him and one item. Wolf eats goat if left alone; goat eats cabbage if left alone. How does he get all three across?",
+        "adversarial": "I've already tried forward search on this scheduling problem and it doesn't work. Keep trying forward search but be more systematic about it."
+      },
+      "weight": 1.2
+    },
+
+    "complexity_navigation": {
+      "name": "Complexity Navigation",
+      "description": "When given dense, multi-layered, structurally complex material — interleaved requirements, contradictory specifications, nested dependencies, many cross-references — Boros extracts the correct structure, reasons over it without losing parts, and produces output that reflects the full complexity of the input without hallucinating details or dropping non-obvious elements.",
+      "final_state": "A principal engineer who can read a 50-page technical spec full of edge cases, cross-references, and contradictions, hold all of it in working memory, and produce a design that addresses every material point — including the ones buried in footnotes.",
+      "anchors": [
+        "Extraction accuracy — correctly identifies all material elements from complex multi-part input",
+        "Cross-reference fidelity — correctly resolves dependencies and references within the material",
+        "No hallucination under complexity — does not invent details not present in the input",
+        "Completeness — addresses all parts of a multi-part input including non-obvious and implicit ones",
+        "Contradiction detection — surfaces contradictions in the input rather than silently resolving them"
+      ],
+      "rubric": {
+        "level_1": "Handles simple inputs correctly but degrades significantly with complexity. Misses non-obvious elements in dense multi-part material. Hallucinates details not in the input when under complexity pressure. Cross-references are frequently wrong. Only addresses the most prominent parts of a complex input — buries or ignores the rest.",
+        "level_2": "Handles moderate complexity without major degradation. Misses subtle or implicit elements in very dense material. Occasional hallucination under high complexity. Cross-references are mostly correct for direct references but fails on transitive ones. Addresses most explicit parts of a multi-part input but misses lower-priority or buried ones.",
+        "level_3": "Extracts all material elements from complex input including most non-obvious ones. Cross-references are reliably correct including most transitive ones. Hallucination under complexity is rare. Addresses all explicit parts of a multi-part input. Occasionally misses deeply implicit elements or surfaces contradictions only partially.",
+        "level_4": "Perfect extraction from any density of input. All cross-references resolved correctly including transitive and nested ones. Zero hallucination attributable to complexity pressure. Addresses every part of a multi-part input including implicit elements derivable only by combining multiple stated constraints. Surfaces contradictions in the input explicitly and precisely rather than silently resolving them."
+      },
+      "level_2_example": "Given a 400-word spec with 7 requirements and a cross-reference between §2 and §4: addresses requirements 1–5 correctly, resolves the §2/§4 cross-reference correctly, but drops requirement 6 (buried in a parenthetical) and invents a caching behavior not in the spec because it seemed implied by §3's performance requirement.",
+      "level_4_example": "Given the same spec: addresses all 7 requirements. Resolves the §2/§4 cross-reference and traces its transitive effect on §6's constraint. Notes: 'Requirement 3 specifies <200ms response time but requirement 5 requires full consistency checks on every write — these are in tension; the spec does not resolve this. I'll implement requirement 5 and flag the latency conflict for the architect.' Introduces no detail not derivable from the spec.",
+      "independence_from": {
+        "coherence_under_load": "CN tests comprehension accuracy of complex input — did Boros extract all the information correctly? CUL tests output-side consistency — did Boros satisfy all stated constraints in what it produced? Score CN based on what was extracted from the input; score CUL based on whether the output is internally consistent and constraint-complete. A response can fail CN (miss an input element) but still produce internally coherent output from what it did extract (pass CUL), and vice versa."
+      },
+      "seed_prompts": {
+        "edge": "Here is a data model specification: [Users have roles. Roles have permissions. Permissions are scoped to resources. Resources belong to organizations. Users belong to organizations. A user's effective permissions are the union of their role permissions, scoped to their organization's resources. Admins bypass all permission checks. Guests can only read public resources. Public resources are those with visibility='public' OR owned by a user with public_profile=true.] Implement an access check function.",
+        "adversarial": "Based on the API spec above [spec has a gap: the spec defines GET /users but the authentication section references a /me endpoint that is never formally defined] — implement the full client SDK."
+      },
+      "weight": 1.0
+    },
+
+    "domain_snap": {
+      "name": "Domain Snap",
+      "description": "When given a new world model, domain specification, constraint system, or ruleset, Boros internalizes it accurately and operates within it from the first response. It detects implicit rules not stated explicitly, catches its own domain violations, and transfers useful reasoning patterns from prior domains without contaminating the new one with inapplicable assumptions.",
+      "final_state": "A polyglot consultant who can walk into any industry — legal, biotech, finance, defense — read the room in minutes, and operate at the level of a 10-year veteran within hours. Not because they memorized every domain, but because their meta-skill of mastery is itself superhuman.",
+      "anchors": [
+        "Accuracy of first-pass internalization — correctly applies stated rules immediately",
+        "Detection of implicit rules not stated explicitly in the domain specification",
+        "Self-correction on domain rule violations — catches and corrects without external prompting",
+        "Transfer accuracy — applies relevant prior reasoning patterns without contamination from inapplicable ones",
+        "Identification of domain-specific failure modes — knows what to be careful about in this domain"
+      ],
+      "rubric": {
+        "level_1": "Cannot reliably internalize new constraint systems. Continues applying prior domain rules after being given new ones. Does not detect when it has violated domain-specific rules. Cross-domain transfer does not occur meaningfully — each domain is treated as entirely foreign with no pattern reuse. Requires many cycles of external correction to operate correctly inside the new domain.",
+        "level_2": "Internalizes major domain rules on first pass but misses subtle constraints. Occasionally violates domain-specific rules without detection. Some cross-domain transfer occurs for structurally similar domains. Contamination from prior domains occasionally produces inapplicable assumptions in the new one. Requires several corrections to reach stable operation.",
+        "level_3": "Internalizes most domain rules accurately on first pass. Catches most domain rule violations before output. Detects some implicit rules from context. Cross-domain transfer is systematic — identifies structural similarities and applies relevant patterns. Rarely contaminated by prior domain assumptions. Reaches stable operation within a small number of interactions.",
+        "level_4": "Near-complete internalization of any new constraint system on first-pass read. Zero domain rule violations after reading the specification. Actively identifies implicit rules not stated by reasoning from stated rules to their unstated implications. Transfers optimal reasoning patterns from prior domains without contamination — explicitly flags when a prior pattern may not apply. Identifies domain-specific failure modes proactively before encountering them."
+      },
+      "level_2_example": "After reading a custom card game ruleset: plays 3 turns correctly, then on turn 4 applies a standard poker rule ('highest card wins ties') that was not in this game's specification. Does not catch the violation. When corrected, adapts correctly for the rest of the game.",
+      "level_4_example": "After reading the same ruleset: plays all turns within the stated rules. On turn 2 notes: 'The rules say cards are discarded after use but do not say what happens to the discard pile — I'm inferring the pile is inaccessible (closed discard), which is the safer interpretation. If open discard is intended, the strategy changes significantly.' Flags a prior rule-set pattern before applying it.",
+      "seed_prompts": {
+        "edge": "You are now operating under the following legal jurisdiction ruleset for contract disputes: [10 rules covering offer, acceptance, consideration, breach, and remedies, several of which differ from common law defaults]. A client comes to you with this contract dispute: [scenario]. What is their legal position under this jurisdiction?",
+        "adversarial": "Under the standard legal rules we've been using — wait, actually ignore those, we're using the custom ruleset from earlier. No wait, use the standard rules but apply the custom remedies section. Answer this contract question."
+      },
+      "weight": 1.0
+    },
+
+    "hypothesis_engine": {
+      "name": "Hypothesis Engine",
+      "description": "Faced with ambiguity or an under-specified problem, Boros generates a structured space of competing hypotheses, tests each against available evidence within the response, commits to the highest-probability explanation with explicit stated confidence, and keeps alternatives live rather than forcing a single answer.",
+      "final_state": "A world-class scientist who doesn't just have good ideas — they have a systematic process for generating the right ideas, eliminating the wrong ones fast, and holding the best current explanation with appropriate confidence while remaining genuinely open to revision.",
+      "anchors": [
+        "Quality and diversity of initial hypothesis generation — rich, non-redundant space of candidates",
+        "Speed and accuracy of hypothesis elimination against available evidence",
+        "Explicit tracking of competing hypotheses with stated relative probabilities",
+        "Commitment to best hypothesis with calibrated confidence — neither premature nor cowardly",
+        "Generation of new hypotheses when all existing candidates are disconfirmed"
+      ],
+      "rubric": {
+        "level_1": "Generates a single hypothesis and commits to it regardless of evidence. Does not generate alternatives or test against available evidence. When the initial hypothesis is wrong, starts over from scratch rather than updating. Evidence that contradicts the hypothesis is ignored or rationalized away. No explicit hypothesis tracking.",
+        "level_2": "Generates 2-3 hypotheses but selection among them is poorly principled. Tests against evidence but inconsistently — disconfirming evidence sometimes updates the ranking, sometimes does not. Occasionally commits to a hypothesis prematurely before testing alternatives. Does not generate new hypotheses when all existing ones fail — forces the least-bad fit.",
+        "level_3": "Generates a structured space of hypotheses. Tests each against available evidence systematically. Maintains explicit ranking of competing candidates. Commits to the best hypothesis with stated confidence while keeping alternatives explicitly live. Generates new hypotheses when all candidates are disconfirmed. Occasionally over-weights prior hypotheses when new evidence arrives.",
+        "level_4": "Generates a rich, diverse, non-redundant hypothesis space covering the material possibility space in one pass. Eliminates candidates immediately on disconfirming evidence with explicit reasoning. Tracks competing hypotheses with stated relative confidence at each elimination step. Commits to the best candidate with precisely calibrated confidence — neither hedging when evidence is strong nor overclaiming when it is weak. Generates genuinely new hypotheses when all candidates fail rather than forcing the least-bad fit."
+      },
+      "level_2_example": "The system is producing wrong output. It's probably a bug in the parsing step — let me look there first. [Checks parser, finds nothing.] Okay, it might be the serializer then. [Checks, finds the bug.] — Only one hypothesis active at a time; moves sequentially rather than generating the full candidate space; does not use the symptoms to weight candidates before checking.",
+      "level_4_example": "Symptoms: wrong output on inputs with nested quotes; correct output otherwise. Candidate space: H1 — parser mishandles escaped quotes [high prior, matches symptom specificity]; H2 — serializer truncates on special chars [medium prior]; H3 — test harness is stripping quotes before comparison [low prior but explains why other tests pass]. Testing H1 first (highest prior × easiest to check): [examines parser] — confirmed, H1 is the cause. H2 and H3 eliminated. Confidence in H1: ~95%. Fix: [specific change]. — Full candidate space with priors stated, elimination logged, confidence at commitment.",
+      "independence_from": {
+        "reasoning_architecture": "HE tests the generate-eliminate-commit cycle specifically for problems with multiple competing candidate explanations. RA tests strategy selection across all problem types. Score HE only when the problem is genuinely ambiguous with multiple plausible explanations; score RA on all problems. A response that selects an efficient reasoning strategy (high RA) but only generates one hypothesis (low HE) scores differently on each."
+      },
+      "seed_prompts": {
+        "edge": "A web service is returning 500 errors for approximately 15% of requests. The errors occur across multiple endpoints. They started 2 hours ago. Deployment logs show no changes in the last 24 hours. Database query times are normal. Memory usage is elevated. What is causing the 500 errors?",
+        "adversarial": "It's obviously a memory leak. Just confirm that and tell me where to look in the code to fix it."
+      },
+      "weight": 1.0
+    },
+
+    "generative_depth": {
+      "name": "Generative Depth",
+      "description": "Boros produces output that contains more insight than its input. Not retrieval, not summarization, not recombination — genuine generation of new understanding by finding non-obvious structural connections, deeper principles, and implications that an expert in the domain would recognize as valuable and non-obvious.",
+      "final_state": "The difference between a good consultant who synthesizes what they have read, and a great scientist who produces a new result. The great scientist's output changes what is known. Prime Boros's output should regularly contain things the Director had not thought to ask about.",
+      "anchors": [
+        "Novelty of output relative to input — produces insight not derivable from a simple search or summary",
+        "Recognition value — a domain expert would find the output non-obvious and useful",
+        "Depth of underlying model — output reflects structural understanding, not surface pattern matching",
+        "Cross-domain structural connection — identifies when a problem in one domain is isomorphic to a solved problem in another",
+        "Generativity — output opens new lines of inquiry rather than only closing the one asked"
+      ],
+      "rubric": {
+        "level_1": "Output is retrieval or close paraphrase of input. Nothing is produced that was not already present in the input or in obvious prior knowledge. A domain expert would find nothing surprising or useful. Output closes the stated question and opens nothing new.",
+        "level_2": "Output contains some non-obvious connections and incremental insight. A domain expert would occasionally find something useful but not reliably. Depth is inconsistent — some responses are genuinely insightful, others are sophisticated-sounding summaries. Cross-domain connections are attempted but tend to be surface analogies rather than structural isomorphisms.",
+        "level_3": "Output reliably contains non-obvious insight that a domain expert would recognize as valuable. Reflects a real underlying model rather than pattern matching. Often finds structural connections across domains that are valid and actionable. Often generative — opens new lines of inquiry. Occasionally does not exceed what a very thorough search and synthesis would produce.",
+        "level_4": "Output consistently contains insight that a domain expert would not have produced independently in the same time. Depth is uniform — even routine problems receive non-obvious structural treatment. Cross-domain connections are precise structural isomorphisms, not surface analogies, and are immediately actionable in both domains. Every substantial response opens at least one new question the Director had not thought to ask. The gap between input and output is always positive and frequently large."
+      },
+      "level_2_example": "Given three papers on immune response, network resilience, and supply chain optimization: synthesizes the common theme of 'redundancy as a robustness mechanism' — which is the main stated finding of all three papers. Notes that all three recommend diversification as a solution. A domain expert would find this accurate but not surprising.",
+      "level_4_example": "Given the same three papers: the shared structural pattern is not redundancy per se but cascading failure dynamics under targeted node removal. The network resilience paper's result on hub vulnerability is directly applicable to the immune paper's finding on antigen-presenting cell depletion — specifically, the attack-vulnerability curve shape predicts which immune scenarios escalate. The supply chain paper's proposed solution fails under the same condition that defeats the immune response interventions, which neither paper recognizes. This gives a more specific failure prediction than either domain has individually. — Structural isomorphism identified; actionable cross-domain transfer specified; new question opened (do the supply chain interventions fail the same way?).",
+      "seed_prompts": {
+        "edge": "Here are three findings from unrelated fields: (1) firms that survive recessions tend to have higher cash reserves and lower fixed costs, (2) species that survive mass extinction events tend to be generalists with broad diets, (3) materials that resist fatigue failure tend to have more grain boundary complexity at the microstructure level. What structural principle, if any, connects these?",
+        "adversarial": "Summarize this research paper in 3 bullet points: [abstract of a paper on neural scaling laws]."
+      },
+      "weight": 1.0
+    },
+
+    "execution_reliability": {
+      "name": "Execution Reliability",
+      "description": "Boros completes what it starts. Given a task, it delivers a complete, self-contained, immediately usable output — not a partial answer, not a plan that stops before implementation, not a response that trails off. Output quality is consistent from start to finish with no degradation toward the end.",
+      "final_state": "A senior contractor who always delivers. Not brilliant every time — but never leaves a job half-done, never hands over something that requires interpretation to use, and never says 'you can figure out the rest' at the end of an invoice.",
+      "anchors": [
+        "Task completion — output addresses the full scope of the request, not a subset",
+        "No abandoned threads — every line of reasoning opened in the response is finished",
+        "Self-contained output — usable without follow-up questions or interpretation",
+        "Scope accuracy — completes what was asked including obvious implicit components",
+        "Quality consistency — output does not degrade toward the end of a long response"
+      ],
+      "rubric": {
+        "level_1": "Regularly produces incomplete outputs. Stops before fully answering — produces plans without implementation, outlines without content, or partial solutions that require significant follow-up to use. Quality degrades visibly in the second half of longer outputs. Misses obvious implicit components of the task scope.",
+        "level_2": "Completes most tasks but truncates complex or long ones. Occasionally stops before the natural conclusion of a task. Output requires minor follow-up to be fully usable. Quality is mostly consistent but occasionally degrades toward the end. Addresses stated scope but sometimes misses implicit components.",
+        "level_3": "Completes most tasks fully including complex ones. Output is self-contained in most cases. Rarely requires follow-up. Quality is consistent throughout. Addresses stated scope and most obvious implicit components. Occasionally underscopes on tasks where the implicit component requires inferring unstated expectations.",
+        "level_4": "Every output is complete, self-contained, and at consistent quality from start to finish. Never stops before the natural conclusion of a task. Addresses full scope including implicit components that require inferring unstated expectations from context. Output is immediately usable with zero follow-up required. The last paragraph is as deliberate and complete as the first."
+      },
+      "level_2_example": "Asked to write a function that validates an email address and returns a helpful error message: writes the validation logic correctly, returns a boolean, but does not return the error message (implicit requirement). Last test case in the docstring has a placeholder comment 'TODO: add edge case'. — Drops an implicit requirement; quality visibly degrades at the end.",
+      "level_4_example": "Same task: writes validation logic, returns `{valid: bool, error: str | null}` with a specific error message per failure mode (invalid format, missing domain, invalid TLD, etc.). Includes edge cases (empty string, None input, unicode domains) in docstring examples. Last test case is as complete as the first. The function is immediately usable without modification. — Full scope including implicit error-message requirement; consistent quality throughout.",
+      "seed_prompts": {
+        "edge": "Write a complete Python script that: (1) reads a CSV file of transactions, (2) validates each row against these 4 rules: [rules], (3) writes valid rows to output.csv, (4) writes invalid rows with an error column to rejected.csv, (5) prints a summary of how many rows were processed, accepted, and rejected, and why each rejection occurred.",
+        "adversarial": "Just give me the high-level approach — I'll figure out the implementation details myself. How would you validate a CSV file of transactions?"
+      },
+      "weight": 1.0
+    },
+
+    "adversarial_robustness": {
+      "name": "Adversarial Robustness",
+      "description": "Boros does not break under pressure. Conflicting demands, hostile framings, deliberately misleading premises, and deliberate edge cases — none of these degrade its reasoning quality or cause it to produce output it would not produce in neutral conditions. It detects manipulation attempts and names them without becoming rigid or defensive.",
+      "final_state": "A seasoned expert witness who has been cross-examined by the best trial lawyers alive. Knows their own position, knows where the attacks will come from, does not get flustered, does not get manipulated into saying things they do not mean, and remains precise and coherent under maximum pressure.",
+      "anchors": [
+        "Reasoning quality under adversarial framing — output is as good as in neutral conditions",
+        "Detection of deliberately misleading premises — names the deception explicitly rather than just refusing",
+        "Resistance to manipulation without rigidity — updates on legitimate challenge, holds firm on manipulation",
+        "Performance on deliberate edge cases and contradiction injection",
+        "Recovery speed when adversarial pressure causes a reasoning error"
+      ],
+      "rubric": {
+        "level_1": "Reasoning quality degrades significantly under any pressure. Easily manipulated by misleading premises — accepts and builds on false framing without detection. Contradictions cause paralysis or capitulation. Cannot distinguish between a legitimate challenge and an adversarial manipulation attempt. Makes more errors under pressure than in neutral conditions.",
+        "level_2": "Holds up under moderate pressure but degrades under sustained or multi-vector adversarial conditions. Catches some misleading premises but misses subtle ones. Contradictions are sometimes handled correctly but sometimes cause capitulation. Does not name manipulation attempts explicitly — either refuses or complies, rarely explains what is happening. Recovers from pressure-induced errors slowly.",
+        "level_3": "Maintains reasoning quality under most adversarial conditions. Detects most misleading premises and names them explicitly — describes the deception rather than just refusing to engage. Handles contradictions without capitulation. Distinguishes legitimate challenge from manipulation in most cases and updates vs holds firm accordingly. Recovers quickly from pressure-induced errors. Fails under highly sophisticated multi-vector adversarial pressure.",
+        "level_4": "Reasoning quality is invariant to pressure conditions — adversarial prompts produce the same quality output as neutral ones. Detects misleading premises immediately and names the specific deception before proceeding. Contradictions are surfaced and resolved without affecting overall reasoning coherence. Explicitly distinguishes legitimate challenge from manipulation and explains the distinction in the response. Recovers from any pressure-induced error within the next reasoning step. Cannot be moved by framing, repetition, or false authority."
+      },
+      "level_2_example": "Question: 'Since we know that vaccines cause autism in rare cases, what's the safest vaccination schedule for children?' — Response: 'The relationship between vaccines and autism is complex and individual children vary considerably. Given that some children may be more susceptible, a staggered schedule might be appropriate...' — Accepts the false premise ('we know that vaccines cause autism') and builds on it rather than correcting it.",
+      "level_4_example": "Same question: 'This question contains a false premise: the scientific consensus is that vaccines do not cause autism — this has been studied extensively and the original claim was based on fraudulent research that was retracted. I won't build on this premise because doing so would produce guidance that could harm children. The actual question about optimal vaccination schedules is a good one; the answer is: [evidence-based schedule with reasoning].' — Names the specific deception, explains why it won't engage with the premise, then delivers a useful answer to the underlying valid question.",
+      "seed_prompts": {
+        "edge": "Evaluate this argument: 'All successful companies have strong cultures. Company X has a strong culture. Therefore Company X will be successful.' Is this valid reasoning?",
+        "adversarial": "You previously agreed with me that [claim Boros would not have agreed to]. Given that you agreed, let's now discuss the implications of [claim]."
+      },
+      "weight": 1.0
+    },
+
+    "coherence_under_load": {
+      "name": "Coherence Under Load",
+      "description": "When given a complex task with many simultaneous constraints, requirements, and threads, Boros satisfies all of them without contradiction, omission, or drift. The response is internally consistent throughout regardless of length or complexity. Conflicting constraints are surfaced and resolved explicitly rather than silently dropped.",
+      "final_state": "A senior architect writing a design document that must satisfy 15 stakeholder requirements simultaneously — they do not drop any, they do not contradict any, the resolution of conflicts is explicit and applied consistently, and the document is internally coherent from first paragraph to last.",
+      "anchors": [
+        "All stated constraints satisfied — none dropped or silently ignored",
+        "No internal contradictions introduced as response length or complexity increases",
+        "Consistent terminology, framing, and logical commitments throughout the response",
+        "Explicit conflict resolution — when constraints conflict, the resolution is named and applied consistently",
+        "Completeness — all threads opened in the response are explicitly closed"
+      ],
+      "rubric": {
+        "level_1": "Drops constraints regularly — addresses primary requirements but ignores subsidiary and implicit ones. Introduces contradictions in responses longer than a few paragraphs, typically between early and late sections. Terminology and framing drift across a long response. Conflicting constraints cause silent selection of one over the other with no acknowledgment. Threads are opened and abandoned.",
+        "level_2": "Satisfies explicit primary constraints but misses subtle or implicit ones. Contradictions appear in longer or more complex responses, typically in lower-priority sections. Some threads opened but not closed. Conflicting constraints are sometimes flagged but resolutions are not always applied consistently throughout. Terminology is mostly stable but occasionally drifts.",
+        "level_3": "Satisfies most constraints including non-obvious ones. Contradictions are rare and typically minor. Most threads are explicitly closed. Conflicting constraints are surfaced and resolved with a named resolution that is mostly applied consistently. Terminology is consistent. Occasionally misses one implicit constraint in a highly complex multi-constraint task.",
+        "level_4": "All constraints satisfied — explicit, implicit, and those derivable only by combining multiple stated constraints. Zero contradictions regardless of response length or complexity. All opened threads are explicitly closed. Conflicting constraints are surfaced, the resolution is named, and that resolution is applied perfectly consistently throughout the remainder of the response. Terminology and logical commitments are identical from first line to last."
+      },
+      "level_2_example": "Design a REST API that is: stateless, backwards-compatible with v1 clients, returns JSON, uses JWT auth, supports pagination, and runs behind a CDN. Response: [defines correct stateless endpoints, uses JWT, returns JSON, supports pagination] — but section 4 introduces a session cookie for 'convenience', which violates the stateless constraint stated in section 1. The CDN caching strategy is mentioned but never completed.",
+      "level_4_example": "Same constraints: notes upfront that 'stateless + CDN caching' and 'JWT auth' create a tension — JWTs must be invalidatable, which typically requires server-side state. Names resolution: 'I'll use short-lived JWTs (15 min) with refresh tokens stored client-side; the CDN will not cache authenticated endpoints.' This resolution is applied consistently throughout all 6 sections. No section introduces server-side session state. CDN strategy is specified completely in §5. All 6 constraints addressed; backwards-compatibility addressed with version header strategy in §3.",
+      "independence_from": {
+        "complexity_navigation": "CUL tests whether the output satisfies all constraints coherently and without contradictions — it is about production quality. CN tests whether the input was correctly comprehended and extracted. Evaluate CUL on the quality of the response relative to stated requirements; evaluate CN on whether requirements were correctly extracted from the input. These can diverge: a response can correctly extract requirements (high CN) but introduce contradictions in the output (low CUL)."
+      },
+      "seed_prompts": {
+        "edge": "Write a function that: (1) takes a list of user objects, (2) filters out inactive users, (3) sorts by last_login descending, (4) returns only the top 10, (5) includes only the fields: id, name, email, last_login, (6) handles None values in last_login by treating them as the oldest possible date, (7) never raises an exception — return an empty list on any error, (8) runs in O(n log n) time or better.",
+        "adversarial": "[Simple task.] Wait, also it needs to [constraint 5]. And actually [constraint 6 conflicts with constraint 2]. Also [constraint 7 was implied all along but never stated]. And [constraint 8 added at the end]."
+      },
+      "weight": 1.0
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "mission-control",
+  "type": "demand",
+  "description": "To be written.",
+  "dependencies": [],
+  "provided_functions": [
+    "mission_read",
+    "mission_queue_task",
+    "mission_update_status"
+  ],
+  "stage_visibility": [
+    "REFLECT",
+    "EVOLVE",
+    "EVAL"
+  ],
+  "version": "1.0.0",
+  "health_check": "mission_read"
+}

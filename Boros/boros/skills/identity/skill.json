@@ -1,0 +1,19 @@
+{
+  "name": "identity",
+  "type": "boot",
+  "description": "To be written.",
+  "dependencies": [
+    "mode-controller"
+  ],
+  "provided_functions": [
+    "identity_read",
+    "identity_update"
+  ],
+  "stage_visibility": [
+    "REFLECT",
+    "EVOLVE",
+    "EVAL"
+  ],
+  "version": "1.0.0",
+  "health_check": "identity_read"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "temporal-consciousness",
+  "type": "boot",
+  "description": "To be written.",
+  "dependencies": [
+    "mode-controller"
+  ],
+  "provided_functions": [
+    "time_now",
+    "time_elapsed_since",
+    "time_cycle_started",
+    "time_estimate_remaining"
+  ],
+  "stage_visibility": [
+    "REFLECT",
+    "EVOLVE",
+    "EVAL"
+  ],
+  "version": "1.0.0",
+  "health_check": "time_now"
+}

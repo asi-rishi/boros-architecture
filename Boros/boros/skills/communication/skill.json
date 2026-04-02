@@ -1,0 +1,17 @@
+{
+  "name": "communication",
+  "type": "demand",
+  "description": "To be written.",
+  "dependencies": [],
+  "provided_functions": [
+    "comm_broadcast",
+    "comm_listen"
+  ],
+  "stage_visibility": [
+    "REFLECT",
+    "EVOLVE",
+    "EVAL"
+  ],
+  "version": "1.0.0",
+  "health_check": "comm_broadcast"
+}

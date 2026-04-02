@@ -1,0 +1,20 @@
+{
+  "request_id": "eval-req-042",
+  "eval_id": "eval-c417d29c",
+  "timestamp": "2026-04-02T04:55:38.952154Z",
+  "cycle": 42,
+  "scores": {
+    "reasoning_architecture": 0.85
+  },
+  "composite": 0.85,
+  "difficulty_level": 2,
+  "tests_per_category": 3,
+  "scoring_breakdown": {
+    "reasoning_architecture": {
+      "outcome_score": 1.0,
+      "quality_score": 0.6,
+      "outcome_weight": 0.6,
+      "quality_weight": 0.4
+    }
+  }
+}
