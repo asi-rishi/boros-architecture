@@ -83,4 +83,19 @@ def review_proposal(params: dict, kernel=None) -> dict:
     with open(os.path.join(reviews_dir, f"review-{proposal_id}.json"), "w") as f:
         json.dump(review_record, f, indent=2)
 
+    # Auto-rollback on rejection to enforce safety boundary
+    if verdict != "apply" and kernel:
+        try:
+            prop_file = os.path.join(boros_dir, "session", "proposals", f"{proposal_id}.json")
+            if os.path.exists(prop_file):
+                with open(prop_file) as f:
+                    proposal = json.load(f)
+                skill_name = proposal.get("skill_name")
+                snapshot_id = proposal.get("snapshot_id")
+                if skill_name and snapshot_id and "forge_rollback" in kernel.registry:
+                    kernel.registry["forge_rollback"]({"skill_name": skill_name, "snapshot_id": snapshot_id}, kernel)
+                    reason += " [AUTO-ROLLBACK EXECUTED]"
+        except Exception as rollback_e:
+            reason += f" [AUTO-ROLLBACK FAILED: {rollback_e}]"
+
     return {"status": "ok", "verdict": verdict, "reason": reason, "confidence": confidence}

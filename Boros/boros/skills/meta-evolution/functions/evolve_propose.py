@@ -7,6 +7,8 @@ def evolve_propose(params: dict, kernel=None) -> dict:
 
     proposal = {
         "id": prop_id,
+        "skill_name": params.get("skill_name", ""),
+        "snapshot_id": params.get("snapshot_id", ""),
         "description": params.get("description", ""),
         "target_file": params.get("target_file", ""),
         "diff_summary": params.get("diff_summary", ""),

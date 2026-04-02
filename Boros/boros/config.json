@@ -15,8 +15,9 @@
   },
   "providers": {
     "evolution_api": {
-      "provider": "google",
-      "model": "gemini-2.5-pro"
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-20250514",
+      "max_tokens": 8192
     },
     "meta_eval_api": {
       "provider": "openai",

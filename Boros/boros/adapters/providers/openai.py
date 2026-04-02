@@ -26,7 +26,12 @@ class OpenaiAdapter(BaseAdapter):
             oai_messages.append({"role": "system", "content": system})
 
         for msg in messages:
-            oai_messages.append(self._to_oai_message(msg))
+            converted = self._to_oai_message(msg)
+            # _to_oai_message returns a list for tool_result messages (one per tool)
+            if isinstance(converted, list):
+                oai_messages.extend(converted)
+            else:
+                oai_messages.append(converted)
 
         kwargs = {"model": self.model, "messages": oai_messages}
         if self.max_tokens:

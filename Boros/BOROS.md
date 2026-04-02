@@ -63,8 +63,8 @@ All Python scripts are auto-resolved relative to the project container, meaning 
 The physical "Brain" of Boros communicates through `adapters/base_adapter.py`. 
 Any API LLM (Claude, GPT, Ollama) hooks directly into the factory function located in `kernel.py`:
 ```python
-self.evolution_llm = load_adapter(self.config["providers"]["evolution_api"]["provider"])
-self.meta_eval_llm = load_adapter(self.config["providers"]["meta_eval_api"]["provider"])
+self.evolution_llm = load_adapter(self.config["providers"]["evolution_api"])
+self.meta_eval_llm = load_adapter(self.config["providers"]["meta_eval_api"])
 ```
 
 **If you are a fresh Agent tasked with bringing Boros online:**

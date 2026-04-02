@@ -153,6 +153,33 @@ class BorosKernel:
             except Exception as e:
                 raise RuntimeError(f"Failed to load skill {skill_name}: {e}")
 
+    def reload_skill(self, skill_name: str):
+        print(f"[Kernel] Dynamically reloading skill: {skill_name}")
+        s_info = self.manifest["skills"].get(skill_name)
+        if not s_info:
+            return False
+            
+        module_path = f"boros.skills.{skill_name}.functions"
+        
+        # 1. Reload specific function submodules to ensure fresh code
+        for func_name in s_info.get("provided_functions", []):
+            sub_path = f"{module_path}.{func_name}"
+            if sub_path in sys.modules:
+                importlib.reload(sys.modules[sub_path])
+        
+        # 2. Reload the main __init__ module to capture re-exported function pointers
+        if module_path in sys.modules:
+            module = importlib.reload(sys.modules[module_path])
+        else:
+            module = importlib.import_module(module_path)
+            
+        # 3. Re-bind fresh functions to registry
+        for func_name in s_info.get("provided_functions", []):
+            if hasattr(module, func_name):
+                self.registry[func_name] = getattr(module, func_name)
+                
+        return True
+
 if __name__ == "__main__":
     kernel = BorosKernel()
     import importlib

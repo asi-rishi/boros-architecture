@@ -26,4 +26,14 @@ def evolve_apply(params: dict, kernel=None) -> dict:
     with open(prop_file, "w") as f:
         json.dump(proposal, f, indent=2)
 
+    # Trigger dynamic module reload into actual execution memory
+    skill_name = proposal.get("skill_name")
+    if skill_name and kernel and hasattr(kernel, "reload_skill"):
+        try:
+            success = kernel.reload_skill(skill_name)
+            if success:
+                return {"status": "ok", "message": f"Proposal {proposal_id} applied and {skill_name} LIVE reloaded."}
+        except Exception as e:
+            return {"status": "error", "message": f"Proposal applied but RELOAD FAILED for {skill_name}: {e}"}
+
     return {"status": "ok", "message": f"Proposal {proposal_id} committed to evolution records."}

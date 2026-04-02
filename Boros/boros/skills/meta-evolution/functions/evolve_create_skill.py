@@ -40,4 +40,37 @@ def evolve_create_skill(params: dict, kernel=None) -> dict:
     with open(os.path.join(skill_dir, "functions", "__init__.py"), "w") as f:
         f.write("\n".join(init_imports) + "\n")
 
-    return {"status": "ok", "message": f"Skill {skill_name} created with {len(functions)} functions", "path": skill_dir}
+    # ── UPDATE MANIFEST.JSON so the kernel loads this skill on next boot ──
+    manifest_path = os.path.join(boros_dir, "manifest.json")
+    try:
+        with open(manifest_path, "r") as f:
+            manifest = json.load(f)
+
+        manifest["skills"][skill_name] = {
+            "path": f"skills/{skill_name}",
+            "type": "demand",
+            "dependencies": [],
+            "provided_functions": functions
+        }
+
+        with open(manifest_path, "w") as f:
+            json.dump(manifest, f, indent=2)
+    except Exception as e:
+        return {"status": "partial", "message": f"Skill created but manifest update failed: {e}", "path": skill_dir}
+
+    # ── HOT-LOAD into live kernel registry ──
+    if kernel:
+        try:
+            import importlib
+            module_path = f"boros.skills.{skill_name}.functions"
+            module = importlib.import_module(module_path)
+            for func_name in functions:
+                if hasattr(module, func_name):
+                    kernel.registry[func_name] = getattr(module, func_name)
+            # Update kernel's manifest reference
+            kernel.manifest = manifest
+        except Exception as e:
+            return {"status": "partial", "message": f"Skill created + manifest updated, but hot-load failed: {e}", "path": skill_dir}
+
+    return {"status": "ok", "message": f"Skill {skill_name} created with {len(functions)} functions, manifest updated, registry loaded.", "path": skill_dir}
+

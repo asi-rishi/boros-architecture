@@ -16,7 +16,7 @@ def tool_terminal_input(params: dict, kernel=None) -> dict:
         return {"status": "error", "message": f"Job {job_id} is already dead. Returned: {proc.returncode}"}
         
     try:
-        if not text.endswith("\\n"): text += "\\n"
+        if not text.endswith("\n"): text += "\n"
         proc.stdin.write(text)
         proc.stdin.flush()
         return {"status": "ok", "message": "Input sent."}
