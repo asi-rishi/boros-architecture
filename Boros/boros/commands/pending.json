@@ -1,5 +1,6 @@
 {
   "pending": [
-    "inject \"hello\""
+    "inject \"hello\"",
+    "help"
   ]
 }

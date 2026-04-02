@@ -65,20 +65,5 @@ def reflection_analyze_trace(params: dict, kernel=None) -> dict:
         "category_analysis": analysis,
         "weakest_category": weakest_category,
         "weakest_score": round(lowest_avg, 3),
-        "recommendation": _generate_detailed_recommendation(weakest_category, lowest_avg) if weakest_category else "No score data available. Run evaluations first."
+        "recommendation": f"To improve '{weakest_category}' (avg: {lowest_avg:.3f}), focus on refining the interpretation of architectural scores. Specifically, analyze why certain architectural choices led to lower scores and use these insights to generate more precise and actionable hypotheses for the next evolution cycle." if weakest_category else "No score data available. Run evaluations first."
     }
-
-def _generate_detailed_recommendation(category, score):
-    if category == "reasoning_architecture":
-        return (
-            f"To improve 'reasoning_architecture' (avg: {score:.3f}), focus on identifying and addressing specific architectural bottlenecks. "
-            "Examine the interaction between skills, data flow, and module responsibilities. "
-            "Consider if a particular skill's design is hindering overall performance or if data structures are inefficient. "
-            "Look for opportunities to refactor, optimize, or redesign components to improve modularity and scalability. "
-            "Generate hypotheses that target concrete architectural changes, such as modifying skill dependencies or redesigning internal data representations."
-        )
-    else:
-        return (
-            f"To improve '{category}' (avg: {score:.3f}), analyze the underlying causes. "
-            "Formulate a hypothesis to target specific code or design improvements related to this category."
-        )

@@ -61,7 +61,7 @@ TOOL_SCHEMAS = {
     "evolve_history": _s("evolve_history", "Read the evolution history (past proposals, verdicts, diffs).", {"limit": {"type": "integer", "default": 10}}),
 
     # ── Meta-Evaluation ──
-    "review_proposal": _s("review_proposal", "Submit a proposal to the independent Meta-Evaluation Review Board (secondary LLM). Returns verdict: apply/reject/modify.", {"proposal_id": {"type": "string"}, "diff": {"type": "string", "description": "The actual code diff"}, "description": {"type": "string"}, "target_file": {"type": "string"}}, ["proposal_id", "diff", "description"]),
+    "review_proposal": _s("review_proposal", "Submit a proposal to the independent Meta-Evaluation Review Board (secondary LLM). Returns verdict: apply/reject/modify.", {"proposal_id": {"type": "string"}, "diff": {"type": "string", "description": "The exact block of code that was modified. IMPORTANT: Do NOT put an english explanation here. You MUST output actual python code snippet or unix diff."}, "description": {"type": "string"}, "target_file": {"type": "string"}}, ["proposal_id", "diff", "description"]),
     "review_modify": _s("review_modify", "Request modifications to a proposal based on review feedback.", {"proposal_id": {"type": "string"}, "modifications": {"type": "string"}}, ["proposal_id", "modifications"]),
     "review_criteria_update": _s("review_criteria_update", "Update the review criteria used by the Meta-Evaluation board.", {"criteria": {"type": "object"}}, ["criteria"]),
     "review_history": _s("review_history", "Read past review decisions.", {"limit": {"type": "integer", "default": 10}}),
