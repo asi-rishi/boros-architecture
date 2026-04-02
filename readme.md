@@ -65,7 +65,7 @@ Every evolution cycle has 3 stages:
 
 **EVOLVE** — Boros operates as a SWE inside the `Skill Forge`. It authors arbitrary raw Python scripts, patches its own memory modules, or updates `SKILL.md` boundaries. The codebase mutation goes through advanced isolation: snapshot, compilation hooks, automated `pytest` suites, and then unified diff transmission to GPT-4o for independent Code Review. If approved, the patch is merged into the kernel permanently. Rejections cause automated rollbacks and feedback logging.
 
-**EVAL** — The external Eval Generator (separate process, separate LLM) tests Boros by sending blind prompts across all 10 categories. Boros responds natively. Responses are scored against the World Model rubrics. Scores flow back: evolution records are backfilled, high-water marks updated, and regressions trigger immediate code rollbacks.
+**EVAL** — The external Eval Generator (separate process, separate LLM) tests Boros by sending **executable tasks** across all 10 categories. Each task runs in an isolated sandbox where Boros can write code, run commands, and produce real outputs. The Eval Generator then checks **outcomes** (did the code run? did the tests pass? is the output correct?) and scores using **dual scoring**: automated outcome verification (60%) + GPT-4o quality assessment (40%). Scores flow back: evolution records are backfilled, high-water marks updated, and regressions trigger immediate code rollbacks.
 
 ---
 
@@ -205,7 +205,7 @@ Example: `boros inject "your last 3 proposals to reasoning/SKILL.md all failed �
 
 **Meta-Evaluation Code Review.** An independent LLM (e.g., GPT-4o) evaluates Boros's code diffs. A python `while` loop that looks logically sound to Claude might get rejected by GPT for memory-leaking potentials.
 
-**Eval Generator is blind testing.** Separate process, separate LLM. Boros never sees the multi-dimensional test matrices. Boros cannot optimize prompts; it must inherently upgrade its software engineering to survive.
+**Eval Generator tests outcomes, not text.** Separate process, separate LLM. Boros never sees the test matrices. Unlike traditional LLM evals that score prose quality, the Eval Generator sends **executable tasks** into isolated sandboxes — Boros must write code that compiles, produce outputs that match, and complete multi-step operations that pass verification scripts. Dual scoring (outcome + quality) ensures evolution pressure comes from **real capability**, not the ability to describe capability.
 
 ---
 
@@ -271,7 +271,7 @@ Yes. Edit `world_model.json`. Changed categories get their high-water marks rese
 Use `boros inject` to nudge strategy. If scores plateau, try: upgrading substrate (Sonnet → Opus), adjusting rubric difficulty, or flagging eval quality issues.
 
 **How much does it cost to run?**
-~$2-5 per cycle on Sonnet. ~$10-20 on Opus. First 100 cycles: $200-2000. The Eval Generator adds ~$0.50-1 per eval (GPT-4o scoring).
+~$2-5 per cycle on Sonnet. ~$10-20 on Opus. First 100 cycles: $200-2000. The Eval Generator adds ~$1-3 per eval (task execution via Claude API + GPT-4o scoring). Outcome-based evals cost more than text-only evals because each task involves a tool-dispatch loop in the sandbox.
 
 **Can I run multiple instances?**
 Yes. Clone the directory. Each instance evolves independently. The Director can prune bad branches.

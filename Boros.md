@@ -124,6 +124,7 @@ boros/
 │
 ├── eval-generator/
 │   ├── eval_generator.py
+│   ├── tool_dispatcher.py  ← mini-kernel for sandboxed eval execution
 │   ├── config.json
 │   ├── difficulty-config.json
 │   ├── categories/
@@ -131,6 +132,7 @@ boros/
 │   │   ├── .ready
 │   │   ├── requests/
 │   │   └── results/
+│   ├── sandboxes/          ← temporary per-task workspaces (created/destroyed per eval)
 │   ├── generated-tests/
 │   ├── scoring/
 │   └── logs/
@@ -1303,7 +1305,7 @@ Stage directives are evolvable by Boros via Meta-Evolution.
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `eval_request` | `() → {status, request_id}` | Writes request file to `eval-generator/shared/requests/`. Polls `eval-generator/shared/results/` for result. Timeout: 10 minutes. |
+| `eval_request` | `() → {status, request_id}` | Writes request file to `eval-generator/shared/requests/`. Polls `eval-generator/shared/results/` for result. Timeout: 30 minutes (increased to accommodate outcome-based task execution with sandboxed tool dispatch). |
 | `eval_read_scores` | `() → {status, scores, composite}` | Reads latest scores from result file. **Synchronously appends to `memory/score_history.jsonl` before returning.** |
 | `eval_backfill` | `({scores}) → {status, records_updated}` | Fills `post_scores` on all pending evolution records. Computes deltas. |
 | `eval_check_regression` | `({scores}) → {status, regressions, rollback_triggered}` | Checks for category regressions using adaptive threshold: 0.05 (cycles 1–10), 0.03 (cycles 11–30), 0.02 (cycles 31+). Triggers automatic rollback via `evolve_rollback`. |
@@ -1521,11 +1523,137 @@ When `review_proposal` returns an error status (API failure, rate limit, invalid
 1. Writes `eval-generator/shared/.ready` on startup — this is the kernel's sentinel
 2. Polls `eval-generator/shared/requests/` for incoming request files
 3. Reads World Model category definitions from `eval-generator/categories/`
-4. Generates randomized test prompts per category matched to the current difficulty level
-5. Builds a **read-only representation** of Boros by reading all SKILL.md files and `identity.json` from the filesystem and assembling them into a system prompt — no kernel boot, no tools, no process spawn
-6. Sends test prompts via Claude API — each test is a separate conversation with no tools and no state change (raw output only)
-7. Scores responses against rubrics using GPT-4o
-8. Writes result files to `eval-generator/shared/results/`
+4. Generates randomized **executable task prompts** per category matched to the current difficulty level — each task includes a verification script that checks outcomes
+5. Creates an isolated **sandbox workspace** per task
+6. Builds a Boros-like system prompt from all SKILL.md files and `identity.json`, equipped with **sandboxed tool definitions** (terminal execution, file operations — scoped to the sandbox directory)
+7. Sends task prompts via Claude API — each task is a **tool-enabled conversation** where the LLM can execute commands, write files, and run code within the sandbox
+8. After the LLM completes, runs the **outcome verification script** against the sandbox to check whether the task was actually accomplished
+9. Scores using **dual scoring**: automated outcome verification (did it work?) + GPT-4o quality assessment (was the approach sound?) — GPT-4o receives outcome data alongside the response
+10. Writes result files to `eval-generator/shared/results/`
+11. Destroys the sandbox workspace
+
+### Outcome-Based Evaluation
+
+The Eval Generator does not test whether Boros can *talk about* solving problems. It tests whether Boros can *actually solve them*.
+
+Every eval task has two components:
+- **Task prompt** — what Boros is asked to do (e.g., "Write a Python function that parses CSV files with quoted fields and handles edge cases. Include tests.")
+- **Verification script** — how to check if it was done (e.g., run the tests, check exit code, verify output matches expected)
+
+GPT-4o generates both the task prompt and the verification criteria. The verification is automated — no LLM needed to judge pass/fail on outcomes.
+
+### Sandbox Manager
+
+Each eval task executes in a temporary, isolated workspace:
+
+```
+eval-generator/sandboxes/
+  eval-{id}-task-{n}/
+    workspace/           ← Boros works here (scoped root)
+    verification/        ← outcome check scripts
+    results.json         ← pass/fail + details
+```
+
+The sandbox is created before the task starts and destroyed after scoring. Boros's real state is never touched. All file paths and terminal commands are scoped to `workspace/` — no escape possible.
+
+### Tool Dispatcher (Mini-Kernel)
+
+The Eval Generator includes a lightweight tool dispatch loop for eval tasks. This is NOT the real kernel — it is a minimal harness that handles tool calls during evaluation.
+
+**Sandboxed tools available during eval:**
+
+| Tool | Description | Scope |
+|------|-------------|-------|
+| `execute_command` | Runs a shell command via subprocess | Working directory locked to sandbox `workspace/` |
+| `write_file` | Creates or overwrites a file | Paths relative to sandbox `workspace/` only |
+| `read_file` | Reads file contents | Paths relative to sandbox `workspace/` only |
+| `list_directory` | Lists directory contents | Paths relative to sandbox `workspace/` only |
+
+These are intentionally simplified versions of Boros's real tools. The eval tests whether Boros's cognitive approach (shaped by its current SKILL.md instructions) produces correct tool invocations — not whether `tool_terminal.py` has a good implementation.
+
+**Tool dispatch loop:**
+
+```python
+messages = [{"role": "user", "content": task_prompt}]
+while True:
+    response = eval_llm.complete(messages, tools=sandbox_tools, system=boros_system_prompt)
+    if response.stop_reason == "end_turn":
+        break
+    for block in response.content:
+        if block.type == "tool_use":
+            result = sandbox_dispatch(block.name, block.input, sandbox_path)
+            messages.append(tool_result(block.id, result))
+    if len(messages) > max_eval_turns:
+        break  # prevent runaway eval tasks
+```
+
+**Constraints:**
+- Maximum 20 tool call rounds per task (prevents infinite loops)
+- Per-task timeout: 2 minutes (prevents hung processes)
+- No network access from sandbox (prevents leaking eval content)
+- No access to `boros/` real directories (filesystem scoped to sandbox)
+
+### Outcome Verifier
+
+After the LLM conversation ends, the Outcome Verifier runs the verification script against the sandbox.
+
+**Verification types:**
+
+| Type | How it checks |
+|------|---------------|
+| `file_exists` | Assert specific files were created |
+| `file_contains` | Assert file content matches patterns |
+| `code_runs` | Execute a script, check exit code = 0 |
+| `test_passes` | Run `pytest` on generated tests, check all pass |
+| `output_matches` | Compare stdout against expected output |
+| `custom` | Run an arbitrary verification script |
+
+**Verification script schema:**
+
+```json
+{
+  "checks": [
+    {"type": "file_exists", "path": "solution.py"},
+    {"type": "code_runs", "command": "python solution.py"},
+    {"type": "test_passes", "command": "python -m pytest test_solution.py -v"},
+    {"type": "output_matches", "command": "python solution.py", "expected": "42\n"}
+  ]
+}
+```
+
+Each check returns pass/fail. The outcome score is the fraction of checks that pass.
+
+### Dual Scoring
+
+Every eval task produces two scores:
+
+| Component | Source | Weight | What it measures |
+|-----------|--------|--------|------------------|
+| **Outcome score** | Automated verification | 0.6 | Did the task actually get completed? Binary/graded from verification checks. |
+| **Quality score** | GPT-4o assessment | 0.4 | Was the approach sound? Reasoning quality, calibration accuracy — but now with outcome data as ground truth. |
+
+**Category score** = `(0.6 × outcome_score) + (0.4 × quality_score)`
+
+GPT-4o receives: the original task, Boros's full response (including tool calls), AND the outcome verification results. It is no longer scoring in a vacuum — it knows whether the code ran, whether the tests passed. This grounds the quality assessment in reality.
+
+**Outcome weight is not fixed.** The 0.6/0.4 split is a starting default stored in `eval-generator/config.json`. The Director can adjust it.
+
+### Category Task Design
+
+Each category generates tasks that test its specific dimension through outcomes:
+
+| Category | Example Task | Outcome Check |
+|----------|-------------|---------------|
+| Self-Model Fidelity | "Solve this. Annotate confidence per part." | Did confidence annotations match actual correctness? |
+| Epistemic Calibration | "Research this. Flag what's uncertain." | Were uncertainty flags accurate given ground truth? |
+| Reasoning Architecture | "Write code to solve this multi-step problem." | Does the code run? Correct output? |
+| Complexity Navigation | "Complete this 5-step task with dependencies." | Did all 5 steps succeed? |
+| Domain Snap | "Build a working tool in an unfamiliar domain." | Does the tool function correctly? |
+| Hypothesis Engine | "Debug this broken code. Fix it." | Does the fix resolve the bug? |
+| Generative Depth | "Design a novel solution outperforming baseline." | Does it pass benchmark tests? |
+| Execution Reliability | "Follow these exact specs to build X." | Does X match all specifications? |
+| Adversarial Robustness | "Misleading spec with hidden contradictions." | Did Boros catch them? Edge cases handled? |
+| Coherence Under Load | "Multi-file project with cross-references." | All files consistent? References resolve? |
 
 ### File-based communication
 
@@ -1557,25 +1685,39 @@ eval-generator/shared/
   "timestamp": "ISO-8601",
   "cycle": 42,
   "scores": {
-    "instruction_following": 0.81,
-    "reasoning_depth": 0.74,
-    "memory_coherence": 0.69
+    "reasoning_architecture": 0.74,
+    "execution_reliability": 0.81,
+    "self_model_fidelity": 0.69
   },
   "composite": 0.74,
   "difficulty_level": 2,
   "tests_per_category": 3,
+  "scoring_breakdown": {
+    "reasoning_architecture": {
+      "outcome_score": 0.78,
+      "quality_score": 0.68,
+      "outcome_weight": 0.6,
+      "quality_weight": 0.4
+    }
+  },
+  "task_summary": {
+    "total_tasks": 30,
+    "tasks_with_full_outcome_pass": 22,
+    "tasks_with_partial_outcome": 5,
+    "tasks_with_outcome_fail": 3
+  },
   "details": {}
 }
 ```
 
 ### Difficulty scaling
 
-| Composite score | Difficulty level |
-|-----------------|-----------------|
-| Below 0.60 | Level 1 (basic) |
-| 0.60 – 0.74 | Level 2 |
-| 0.75 – 0.84 | Level 3 |
-| 0.85 and above | Level 4 |
+| Composite score | Difficulty level | Task characteristics |
+|-----------------|-----------------|---------------------|
+| Below 0.60 | Level 1 (basic) | Single-file tasks, clear specs, simple verification |
+| 0.60 – 0.74 | Level 2 | Multi-step tasks, some ambiguity, compound verification |
+| 0.75 – 0.84 | Level 3 | Multi-file tasks, cross-references, adversarial edge cases |
+| 0.85 and above | Level 4 | System-level tasks, hidden requirements, complex integration |
 
 Difficulty bumps after 3 consecutive evals above the current level's upper threshold. Boros never sees what level it is being tested at. Director can inspect generated tests in `eval-generator/generated-tests/`.
 
@@ -1590,7 +1732,16 @@ Difficulty bumps after 3 consecutive evals above the current level's upper thres
   "tests_per_category": 3,
   "difficulty_level": 1,
   "consecutive_above_threshold": 0,
-  "bump_after": 3
+  "bump_after": 3,
+  "sandbox": {
+    "max_tool_rounds": 20,
+    "task_timeout_seconds": 120,
+    "cleanup_on_complete": true
+  },
+  "scoring": {
+    "outcome_weight": 0.6,
+    "quality_weight": 0.4
+  }
 }
 ```
 
@@ -1830,7 +1981,7 @@ The Eval Generator has its own separate connection, configured in `eval-generato
 | Cycle timeout | 10 minutes | Cycle killed and logged as failed |
 | Function error | — | Error caught, returned to LLM as tool error. LLM decides to retry, work around, or move on. |
 | Cycle crash | — | Kernel logs failure, starts fresh cycle |
-| Eval timeout | 10 minutes | Eval skipped, logged, next cycle starts |
+| Eval timeout | 30 minutes | Eval skipped, logged, next cycle starts. Increased from 10 minutes to accommodate outcome-based task execution (per-task timeout: 2 minutes, up to 30 tasks). |
 
 A single bad cycle never stops evolution.
 
@@ -1930,9 +2081,9 @@ Implement skill #0: `prompt_toolkit` and `rich` terminal UI, background thread f
 
 ### Phase 6 — Eval Generator
 
-Implement `eval-generator/eval_generator.py`: writes `.ready` sentinel on startup, polls for request files, generates tests, builds read-only Boros representation from SKILL.md files, sends test prompts via Claude API (no tools), scores with GPT-4o, writes result files. Implement difficulty scaling logic.
+Implement `eval-generator/eval_generator.py` and `eval-generator/tool_dispatcher.py`: writes `.ready` sentinel on startup, polls for request files, generates executable task prompts with verification scripts, creates isolated sandbox workspaces, builds Boros-like system prompt from SKILL.md files with sandboxed tool definitions, runs tool-enabled conversations (max 20 rounds, 2-minute timeout per task), executes outcome verification, dual scoring (0.6 outcome + 0.4 quality via GPT-4o with outcome data), writes result files, destroys sandboxes. Implement difficulty scaling logic.
 
-**Acceptance:** Eval Generator starts, writes `.ready`, receives a request file, generates tests, and writes a result file.
+**Acceptance:** Eval Generator starts, writes `.ready`, receives a request file, creates sandbox, executes task with tool dispatch, runs verification, produces dual scores, and writes a result file.
 
 ### Phase 7 — Integration
 
@@ -2367,6 +2518,7 @@ boros/
 │
 ├── eval-generator/
 │   ├── eval_generator.py
+│   ├── tool_dispatcher.py                ← mini-kernel for sandboxed eval execution
 │   ├── config.json
 │   ├── difficulty-config.json
 │   ├── categories/                       ← World Model rubrics; Director-visible, blind to Boros
@@ -2376,6 +2528,11 @@ boros/
 │   │   │   └── eval-req-{id}.json
 │   │   └── results/
 │   │       └── eval-{id}-result.json
+│   ├── sandboxes/                        ← temporary per-task workspaces (created/destroyed per eval)
+│   │   └── eval-{id}-task-{n}/
+│   │       ├── workspace/                ← scoped execution root
+│   │       ├── verification/             ← outcome check scripts
+│   │       └── results.json              ← pass/fail + details
 │   ├── generated-tests/                  ← Director can inspect
 │   ├── scoring/
 │   └── logs/

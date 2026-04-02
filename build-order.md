@@ -179,24 +179,29 @@ python boros/kernel.py
 **Create `boros/eval-generator/`:**
 
 - `eval_generator.py` — main process
-- `config.json` — from BOROS.md Section 14
+- `tool_dispatcher.py` — mini-kernel for sandboxed eval task execution
+- `config.json` — from BOROS.md Section 14 (includes sandbox and scoring config)
 - `difficulty-config.json` — thresholds
 - `categories/` — derived from world_model.json rubrics (Director-visible)
 - `shared/requests/` and `shared/results/` — file-based comms
-- `generated-tests/` — test prompts (Director can inspect)
-- `scoring/` — rubric logic
+- `sandboxes/` — temporary per-task workspaces (created/destroyed per eval)
+- `generated-tests/` — test prompts + verification scripts (Director can inspect)
+- `scoring/` — rubric logic + outcome verification
 - `logs/`
 
-**What it does:**
+**What it does (Outcome-Based Evaluation):**
 
 1. Reads category definitions and rubrics
-2. Generates randomized test prompts per category at difficulty level
-3. Builds a read-only representation of Boros by reading all SKILL.md files + `identity.json` and assembling them into a Claude system prompt — no kernel boot, no tools, no process spawn
-4. Sends prompts via Claude API — each test is a separate conversation, no tools, no state change
-5. Scores raw text responses against rubrics using GPT-4o
-6. Writes result file
+2. Generates randomized **executable task prompts** per category at difficulty level — GPT-4o generates both task prompt AND verification script per task
+3. Creates an isolated **sandbox workspace** per task (`sandboxes/eval-{id}-task-{n}/`)
+4. Builds a Boros-like system prompt from all SKILL.md files + `identity.json`, equipped with **sandboxed tool definitions** (execute_command, write_file, read_file, list_directory — all scoped to sandbox)
+5. Sends task via Claude API — **tool-enabled conversation** with dispatch loop (max 20 tool rounds, 2-minute per-task timeout)
+6. Runs **outcome verification** against sandbox (file checks, code execution, test suites, output matching)
+7. **Dual scoring**: automated outcome score (0.6 weight) + GPT-4o quality score (0.4 weight) = category score
+8. Writes result file with scores + scoring breakdown + task summary
+9. Destroys sandbox workspace
 
-**Acceptance:** Eval Generator can receive a request file, generate tests, and write a result file.
+**Acceptance:** Eval Generator can receive a request file, create a sandbox, execute a task with tool dispatch, run verification checks, produce dual scores, and write a result file.
 
 ---
 

@@ -118,7 +118,7 @@ Five blocks, joined by `\n\n`:
 
 Ships pre-filled. Eval Generator needs rubrics on cycle 1. Director edits `world_model.json` directly. Boros sees category names/descriptions/scores but NOT rubrics, weights, or test questions. Changing a category's definition resets its high-water mark.
 
-**Eval Generator** (`eval-generator/eval_generator.py`) — separate process, separate LLM connection, file-based communication only. Builds a read-only Boros copy by reading all SKILL.md files + `identity.json` → assembles into a Claude system prompt → sends test prompts as standalone API calls (no tools, no kernel boot). GPT-4o scores raw text responses against rubrics.
+**Eval Generator** (`eval-generator/eval_generator.py`) — separate process, separate LLM connection, file-based communication only. Builds a Boros-like system prompt from all SKILL.md files + `identity.json` → sends **executable task prompts** via Claude API with **sandboxed tool definitions** (execute_command, write_file, read_file, list_directory — scoped to temp workspace). Each task runs in an isolated sandbox (`eval-generator/sandboxes/`). After execution, **outcome verification** checks whether the task was actually completed (code runs, tests pass, output matches). **Dual scoring**: automated outcome score (60%) + GPT-4o quality assessment with outcome data (40%) = category score. Tests real capability, not text quality.
 
 ### Memory Layout
 

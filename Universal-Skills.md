@@ -38,19 +38,29 @@ Active list of the 19 unconstrained skills and their core capabilities.
 - `router_manifest()`
 
 ### 06 - Context Orchestration
-- (No explicit functions defined)
+- `context_load()`
+- `context_get_manifest()`
 
 ### 07 - Reflection
 - `reflection_analyze_trace(log_data)`
 - `reflection_write_hypothesis(target_category, exact_change, rationale)`
 
 ### 08 - Meta-Evolution
-- `evolve_propose(hypothesis_id, target_file, unified_diff)`
+- `evolve_orient()`
+- `evolve_set_target(category)`
+- `evolve_propose(target_skill, change_description, rationale, proposed_skillmd, target_category, research_sources=[])`
 - `evolve_apply(proposal_id)`
 - `evolve_rollback(cycle_id)`
+- `evolve_create_skill(skill_name, description, initial_skillmd)`
+- `evolve_modify_loop(stage, new_directive)`
+- `evolve_history(category=null, limit=10)`
 
 ### 09 - Meta-Evaluation
 - `review_proposal(proposal_id)`
+- `review_modify(proposal_id, feedback)`
+- `review_criteria_update(category, new_criteria)`
+- `review_history(limit=10)`
+- `_internal/prompt_builder.py`
 
 ### 10 - Loop Orchestrator
 - `loop_start(mode?)`
@@ -586,6 +596,33 @@ To give Boros human-like associative recall without the bloat, you implement an 
 
 ---
 
+## Functions
+
+### context_load(cycle, mode, manifest_only=false)
+
+Gathers all context for the current cycle. If `manifest_only` is false, it returns the aggregated string content ready for injection.
+
+```
+→ {
+    "status": "ok", 
+    "loaded": dict, 
+    "manifest": dict, 
+    "content": str
+  }
+```
+
+The `content` key provides the physical textual strings formatted into `=== SECTION ===` headers for system prompt injection.
+
+### context_get_manifest()
+
+Returns just the JSON manifest dictionary outlining what is currently pinned to the Working Memory Core.
+
+```
+→ {"status": "ok", "manifest": dict}
+```
+
+---
+
 ## Technical Constraints
 
 - Under no circumstances does Context Orchestration load raw `.py` chunks or external documentation into the Prompt automatically. Boros MUST pull that weight using independent tool commands.
@@ -663,13 +700,13 @@ When the Intelligence decides it needs an arbitrary tool (like using `Selenium` 
 
 ## Functions
 
-### evolve_propose(hypothesis_id, target_file, unified_diff)
+### evolve_propose(target_skill, change_description, rationale, proposed_skillmd, target_category, research_sources=[])
 
 Proposes a permanent surgical diff block to any file inside the entire Boros kernel suite. Boros can patch memory modules, `SKILL.md` behaviors, context orchestrator loops, or any raw Python function executing logic locally on disk.
 
 ```
-→ {"status": "ok", "proposal_id": str}
-→ {"status": "error", "reason": "Requires valid hypothesis_id"}
+→ {"status": "ok", "proposal_id": str, "snapshot_id": str}
+→ {"status": "error", "reason": str}
 ```
 
 ### evolve_apply(proposal_id)
@@ -1333,13 +1370,13 @@ Triggers an evaluation cycle.
 Steps:
 1. Write request file to `eval-generator/shared/requests/eval-{cycle:03d}-{uuid8}.json`
 2. Poll `eval-generator/shared/results/` every 10 seconds for a matching result file
-3. Timeout: 10 minutes. If no result arrives, return error.
+3. Timeout: 30 minutes. If no result arrives, return error.
 
 Request file schema: `{"cycle": int, "timestamp": "ISO-8601", "request_id": str}`
 
 ```
 → {"status": "ok", "request_id": str}
-→ {"status": "error", "error": "timeout after 10 minutes"}
+→ {"status": "error", "error": "timeout after 30 minutes"}
 ```
 
 On timeout: log the failure via director_log, return error. The cycle continues to loop_end_cycle — a missing eval is logged but does not halt evolution.
@@ -1453,7 +1490,7 @@ High-water marks reset only when the Director changes a category's definition in
 
 1. **eval_read_scores MUST write to score_history.jsonl before returning.** Synchronous write, not deferred. If the write fails, return an error — do not return scores without writing them.
 2. **Eval Generator must already be running.** The kernel spawns it at boot and waits for `eval-generator/shared/.ready`. If `.ready` is absent, boot halts before the loop starts.
-3. **Timeout is not a crash.** A 10-minute timeout means the eval is skipped for this cycle. Log it, continue to loop_end_cycle. One missing eval does not stop evolution.
+3. **Timeout is not a crash.** A 30-minute timeout means the eval is skipped for this cycle. Log it, continue to loop_end_cycle. One missing eval does not stop evolution.
 4. **Regression check triggers automatic rollback.** This is the only automatic rollback in the system. All other rollbacks are explicit Director commands.
 5. **Adaptive threshold — read cycle from loop_get_state().** Always compute the correct threshold for the current cycle before checking regressions. Log the threshold used.
 6. **High-water marks never decay.** They only go up. A score must strictly exceed the current mark to update it.
