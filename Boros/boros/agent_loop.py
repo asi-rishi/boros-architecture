@@ -153,7 +153,7 @@ class AgentLoop:
             except Exception as e:
                 self.log(f"[ERROR] LLM call failed: {e}")
                 self.log(traceback.format_exc())
-                break
+                raise  # Let the continuous loop catch this and trigger the cooldown sleep
 
             content = response.get("content", [])
             stop_reason = response.get("stop_reason", "end_turn")
@@ -235,7 +235,7 @@ class AgentLoop:
             except Exception as e:
                 self.log(f"[ERROR] Cycle {cycle_num} failed: {e}")
                 self.log(traceback.format_exc())
-                time.sleep(5)
+                time.sleep(30)  # Cooldown extended to allow 429 quota recovery
 
     # ────────────────────────────────────────────
     # Cycle Prompt

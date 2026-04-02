@@ -6,4 +6,4 @@ def identity_read(params: dict, kernel=None) -> dict:
     if os.path.exists(id_file):
         with open(id_file) as f:
             return {"status": "ok", "identity": json.load(f)}
-    return {"status": "ok", "identity": None, "message": "No identity file found."}
+    return {"status": "ok", "identity": None, "message": "Identity missing, please configure."}

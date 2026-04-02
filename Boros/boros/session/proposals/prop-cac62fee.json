@@ -1,0 +1,11 @@
+{
+  "id": "prop-cac62fee",
+  "skill_name": "identity",
+  "snapshot_id": "snap-mock",
+  "description": "Mocked identity implementation",
+  "target_file": "boros/skills/identity/functions/identity_read.py",
+  "diff_summary": "Replaced pass with return statement",
+  "timestamp": "2026-04-02T15:50:51.083722Z",
+  "status": "applied",
+  "applied_at": "2026-04-02T15:50:51.231880Z"
+}

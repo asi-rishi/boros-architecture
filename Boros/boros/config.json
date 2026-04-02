@@ -15,13 +15,13 @@
   },
   "providers": {
     "evolution_api": {
-      "provider": "anthropic",
-      "model": "claude-sonnet-4-20250514",
+      "provider": "gemini",
+      "model": "gemini-2.5-flash",
       "max_tokens": 8192
     },
     "meta_eval_api": {
-      "provider": "openai",
-      "model": "gpt-4o"
+      "provider": "gemini",
+      "model": "gemini-2.5-flash"
     }
   }
 }
