@@ -1,0 +1,11 @@
+{
+  "snapshot_id": "snap-958b9494",
+  "skill_name": "reasoning",
+  "timestamp": "2026-04-02T16:51:40.050609Z",
+  "files": [
+    "reason_check_logic.py",
+    "reason_decompose.py",
+    "reason_evaluate_options.py",
+    "__init__.py"
+  ]
+}

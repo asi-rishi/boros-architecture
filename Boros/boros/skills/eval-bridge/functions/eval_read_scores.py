@@ -7,12 +7,25 @@ def eval_read_scores(params: dict, kernel=None) -> dict:
     results_dir = os.path.join(boros_dir, "eval-generator", "shared", "results")
 
     if eval_id:
-        # Read specific eval
-        result_file = os.path.join(results_dir, f"{eval_id}.json")
-        if os.path.exists(result_file):
-            with open(result_file) as f:
-                result = json.load(f)
-            return {"status": "ok", "scores": result.get("scores", {}), "composite": result.get("composite", 0), "result": result}
+        # Read specific eval (wait up to 10 minutes for slow evals)
+        for attempt in range(120):
+            if eval_id.startswith("req-"):
+                for rf in glob.glob(os.path.join(results_dir, "*.json")):
+                    try:
+                        with open(rf) as f:
+                            result = json.load(f)
+                            if result.get("request_id") == eval_id:
+                                return {"status": "ok", "scores": result.get("scores", {}), "composite": result.get("composite", 0), "result": result}
+                    except Exception:
+                        pass
+            else:
+                result_file = os.path.join(results_dir, f"{eval_id}.json")
+                if os.path.exists(result_file):
+                    with open(result_file) as f:
+                        result = json.load(f)
+                    return {"status": "ok", "scores": result.get("scores", {}), "composite": result.get("composite", 0), "result": result}
+            time.sleep(5)
+        return {"status": "error", "message": f"Timeout waiting for evaluation results for {eval_id}"}
 
     # Read latest results (poll briefly if no results yet)
     for attempt in range(3):
@@ -32,7 +45,7 @@ def eval_read_scores(params: dict, kernel=None) -> dict:
                     score_hist = os.path.join(boros_dir, "memory", "score_history.jsonl")
                     os.makedirs(os.path.dirname(score_hist), exist_ok=True)
                     with open(score_hist, "a") as f:
-                        f.write(json.dumps(latest.get("scores", {})) + "\n")
+                        f.write(json.dumps(latest) + "\n")
                     return {
                         "status": "ok",
                         "scores": latest.get("scores", {}),

@@ -184,10 +184,33 @@ class AgentLoop:
                     inp = block.get("input", {})
                     tid = block["id"]
 
-                    self.log(f"[TOOL] → {name}({json.dumps(inp, default=str)[:300]})")
+                    if name == "evolve_propose":
+                        desc = inp.get("description", "")
+                        self.log(f"\n========================================")
+                        self.log(f"📝 [PROPOSAL CREATED]: {desc}")
+                        self.log(f"========================================\n")
+                        self.log(f"[TOOL] → {name}({json.dumps(inp, default=str)[:300]})")
+                    elif name == "tool_file_edit_diff":
+                        self.log(f"\n========================================")
+                        self.log(f"⚙️ [CODE MUTATION] Targeting: {inp.get('target_file')}")
+                        for i, chunk in enumerate(inp.get("replacement_chunks", [])):
+                            self.log(f"\n--- Chunk {i+1} ---")
+                            target_lines = chunk.get("target_content", "").split("\n")
+                            replace_lines = chunk.get("replacement_content", "").split("\n")
+                            for line in target_lines: self.log(f"[-] {line}")
+                            for line in replace_lines: self.log(f"[+] {line}")
+                        self.log(f"========================================\n")
+                        self.log(f"[TOOL] → {name}(...)")
+                    else:
+                        self.log(f"[TOOL] → {name}({json.dumps(inp, default=str)[:300]})")
+
                     result = self.dispatch_tool(name, inp)
                     result_str = json.dumps(result, default=str)
-                    self.log(f"[TOOL] ← {result_str[:400]}")
+                    
+                    if name in ("evolve_propose", "tool_file_edit_diff"):
+                        self.log(f"[TOOL] ← {result_str}") # print full result for these
+                    else:
+                        self.log(f"[TOOL] ← {result_str[:400]}")
 
                     tool_results.append({
                         "type": "tool_result",

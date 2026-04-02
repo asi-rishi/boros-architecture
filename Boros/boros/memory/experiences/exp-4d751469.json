@@ -1,0 +1,12 @@
+{
+  "id": "exp-4d751469",
+  "type": "lesson",
+  "content": "Improved the `eval_read_scores` function to log the complete evaluation result object to `score_history.jsonl`, enabling more comprehensive historical analysis. This directly addresses the hypothesis of improving the reflection skill's ability to interpret evaluation scores.",
+  "tags": [
+    "eval-bridge",
+    "reflection",
+    "score_history",
+    "data_logging"
+  ],
+  "timestamp": "2026-04-02T17:42:23.987213Z"
+}

@@ -6,9 +6,9 @@ def reason_decompose(params: dict, kernel=None) -> dict:
         return {"status": "error", "message": "problem required"}
         
     if kernel and hasattr(kernel, "evolution_llm"):
-        prompt = (f"Decompose the following problem into a logical sequence of sub-problems or steps.\n"
+        prompt = (f"You are the Boros reasoning cortex. Your task is to decompose a complex problem into a logical, actionable sequence of smaller, manageable sub-problems or steps. Think step-by-step to identify the key components, required information, and necessary actions.\n\n"
                   f"Problem: {problem}\n\n"
-                  f"Respond ONLY with a valid JSON array of strings: [\"step 1\", \"step 2\"]")
+                  f"Provide your response ONLY as a valid JSON array of strings, where each string is a clearly defined sub-problem or step. For example: [\"Understand the user's intent\", \"Identify relevant data sources\", \"Formulate a query\"]")
         try:
             res = kernel.evolution_llm.complete([{"role": "user", "content": prompt}], system="You are the reasoning cortex. Decompose the problem.")
             text = "".join(b.get("text", "") for b in res.get("content", []) if b.get("type") == "text")

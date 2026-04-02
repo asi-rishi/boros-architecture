@@ -1,0 +1,11 @@
+{
+  "snapshot_id": "snap-ff3f442f",
+  "skill_name": "reflection",
+  "timestamp": "2026-04-02T17:42:56.957471Z",
+  "files": [
+    "reflection_analyze_trace.py",
+    "reflection_read_hypothesis.py",
+    "reflection_write_hypothesis.py",
+    "__init__.py"
+  ]
+}

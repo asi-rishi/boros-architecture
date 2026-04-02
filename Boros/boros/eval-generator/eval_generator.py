@@ -7,7 +7,7 @@ sys.path.insert(0, boros_root)
 from boros.adapters import load_adapter
 from boros.kernel import BorosKernel
 from boros.tool_schemas import TOOL_SCHEMAS
-from .tool_dispatcher import ToolDispatcher
+from tool_dispatcher import ToolDispatcher
 
 class EvalGenerator:
     def __init__(self):
@@ -94,7 +94,7 @@ class EvalGenerator:
             eval_id = f"eval-{uuid.uuid4().hex[:8]}"
             print(f"[EvalGenerator] Processing {eval_id} for cycle {req.get('cycle', 0)}")
             
-            categories = req.get("categories", list(self.world_model["categories"].keys()))
+            categories = req.get("categories") or list(self.world_model["categories"].keys())
             scores = {}
             total_score = 0.0
             

@@ -13,9 +13,13 @@
     "self_narrative": "I am a newly instantiated conceptual seed."
   },
   "recent_scores": [
-    {
-      "reasoning_architecture": 0.85
-    }
+    {},
+    {},
+    {},
+    {},
+    {}
   ],
-  "high_water_marks": {}
+  "high_water_marks": {
+    "reasoning_architecture": 0.85
+  }
 }

@@ -1,0 +1,10 @@
+{
+  "id": "exp-fc3a6c59",
+  "type": "observation",
+  "content": "Evaluation request (req-9fd6b5b8) for cycle 8 did not return any scores. This indicates a potential issue with the evaluation process or score reporting within the eval-generator sandbox.",
+  "tags": [
+    "evaluation_failure",
+    "no_scores_returned"
+  ],
+  "timestamp": "2026-04-02T17:33:00.027658Z"
+}

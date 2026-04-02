@@ -1,0 +1,13 @@
+{
+  "snapshot_id": "snap-d4b2a8e7",
+  "skill_name": "eval-bridge",
+  "timestamp": "2026-04-02T17:40:09.143441Z",
+  "files": [
+    "eval_backfill.py",
+    "eval_check_regression.py",
+    "eval_read_scores.py",
+    "eval_request.py",
+    "eval_update_high_water.py",
+    "__init__.py"
+  ]
+}
