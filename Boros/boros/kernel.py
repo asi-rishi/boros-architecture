@@ -35,11 +35,18 @@ class BorosKernel:
         try:
             self.evolution_llm = load_adapter(self.config["providers"]["evolution_api"])
             self.meta_eval_llm = load_adapter(self.config["providers"]["meta_eval_api"])
+            
+            # Force early initialization to ensure keys are valid
+            if hasattr(self.evolution_llm, "client"):
+                _ = self.evolution_llm.client
+            if hasattr(self.meta_eval_llm, "client"):
+                _ = self.meta_eval_llm.client
+                
             print(f"Adapters loaded: evolution={self.config['providers']['evolution_api']['provider']}, meta_eval={self.config['providers']['meta_eval_api']['provider']}")
         except Exception as e:
-            print(f"Warning: Adapter loading deferred (keys not set yet): {e}")
-            self.evolution_llm = None
-            self.meta_eval_llm = None
+            print(f"FATAL: Missing API Keys or Adapter Error: {e}")
+            print("Please configure your .env file. Terminating entirely.")
+            sys.exit(1)
 
     def _check_first_boot(self):
         boros_dir = self.boros_root / "boros"

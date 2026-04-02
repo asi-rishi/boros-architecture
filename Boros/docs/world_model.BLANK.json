@@ -1,0 +1,62 @@
+{
+  "version": "1.0.0",
+  "meta": {
+    "instance_name": "YOUR INSTANCE NAME",
+    "director": "YOUR NAME / ORGANIZATION",
+    "purpose": "One clear sentence: what is this Boros instance being optimized for?",
+    "target_composite": 0.85,
+    "target_difficulty": 4,
+    "notes": "Any notes about this world model — design decisions, what you changed and why."
+  },
+  "categories": {
+    "category_one_key": {
+      "name": "Category One Name",
+      "layer": 1,
+      "description": "One or two sentences. What does this category measure? Be precise. Boros reads this.",
+      "final_state": "A concrete role or vivid reference. Something GPT-4o can model. 1-2 sentences max.",
+      "anchors": [
+        "First distinct evaluation dimension",
+        "Second distinct evaluation dimension",
+        "Third distinct evaluation dimension",
+        "Fourth distinct evaluation dimension"
+      ],
+      "rubric": {
+        "level_1": "What a raw, untuned LLM does with zero SKILL.md evolution. Describe the failure mode with specific, observable behavioral markers. What is present? What is absent?",
+        "level_2": "Better than baseline but reachable by good prompting alone. What improved? What still fails? Describe the partial state specifically.",
+        "level_3": "Requires actual SKILL.md evolution to reach. What behavioral change is present that wasn't at Level 2? Be specific — GPT-4o needs to be able to see this in a response.",
+        "level_4": "The ceiling. What a world-class version of this system would do. Must be genuinely hard. A raw Claude Sonnet with good prompting should not be able to hit this without SKILL.md evolution."
+      },
+      "weight": 1.0
+    },
+
+    "category_two_key": {
+      "name": "Category Two Name",
+      "layer": 1,
+      "description": "Description.",
+      "final_state": "Final state reference.",
+      "anchors": ["Anchor one", "Anchor two", "Anchor three", "Anchor four"],
+      "rubric": {
+        "level_1": "Level 1 description.",
+        "level_2": "Level 2 description.",
+        "level_3": "Level 3 description.",
+        "level_4": "Level 4 description."
+      },
+      "weight": 1.0
+    },
+
+    "category_three_key": {
+      "name": "Category Three Name",
+      "layer": 2,
+      "description": "Description.",
+      "final_state": "Final state reference.",
+      "anchors": ["Anchor one", "Anchor two", "Anchor three", "Anchor four"],
+      "rubric": {
+        "level_1": "Level 1 description.",
+        "level_2": "Level 2 description.",
+        "level_3": "Level 3 description.",
+        "level_4": "Level 4 description."
+      },
+      "weight": 1.0
+    }
+  }
+}
