@@ -5,6 +5,8 @@ boros_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, boros_root)
 
 from boros.adapters import load_adapter
+from boros.kernel import BorosKernel
+from boros.tool_schemas import TOOL_SCHEMAS
 from .tool_dispatcher import ToolDispatcher
 
 class EvalGenerator:
@@ -103,14 +105,31 @@ class EvalGenerator:
                 os.makedirs(workspace_dir, exist_ok=True)
                 
                 task = self._generate_task(cat_id)
-                dispatcher = ToolDispatcher(workspace_dir)
+                kernel = BorosKernel()
+                # Force reload to ensure we pick up the latest code modified by the main agent loop
+                for skill_name in kernel.manifest.get("skills", {}):
+                    kernel.reload_skill(skill_name)
+
+                dispatcher = ToolDispatcher(workspace_dir, kernel)
                 
                 # Mini Agent Loop Simulation
                 messages = [{"role": "user", "content": f"Task: {task}\nSolve this using your tools."}]
-                tools = [
+                
+                # Inject actual Boros tools for evaluation
+                allowed_skills = ["reasoning", "scratchpad", "tool-use", "web-research"]
+                tools = []
+                for skill_name in allowed_skills:
+                    if skill_name in kernel.manifest.get("skills", {}):
+                        s_info = kernel.manifest["skills"][skill_name]
+                        for func_name in s_info.get("provided_functions", []):
+                            if func_name in TOOL_SCHEMAS:
+                                tools.append(TOOL_SCHEMAS[func_name])
+                                
+                # Keep basic stub tools so the LLM doesn't get confused if it tries normal file operations
+                tools.extend([
                     {"name": "write_file", "description": "Write a file", "input_schema": {"type": "object", "properties": {"path": {"type": "string"}, "content": {"type": "string"}}}},
                     {"name": "read_file", "description": "Read a file", "input_schema": {"type": "object", "properties": {"path": {"type": "string"}}}}
-                ]
+                ])
                 
                 transcript = f"Task: {task}\n\n"
                 
