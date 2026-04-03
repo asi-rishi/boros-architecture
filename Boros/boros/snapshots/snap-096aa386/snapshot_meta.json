@@ -1,0 +1,11 @@
+{
+  "snapshot_id": "snap-096aa386",
+  "skill_name": "skill-router",
+  "timestamp": "2026-04-03T08:44:11.867661Z",
+  "files": [
+    "router_get_budget.py",
+    "router_get_tools.py",
+    "router_manifest.py",
+    "__init__.py"
+  ]
+}

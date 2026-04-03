@@ -44,25 +44,48 @@ def evolve_orient(params: dict, kernel=None) -> dict:
             if os.path.isdir(func_dir):
                 for py_file in glob.glob(os.path.join(func_dir, "*.py")):
                     if os.path.basename(py_file) != "__init__.py" and not py_file.endswith("__"):
-                        # Check file size — small files are likely stubs
                         size = os.path.getsize(py_file)
-                        if size < 150:
-                            skill_targets.append({
-                                "skill": skill_name,
-                                "file": os.path.relpath(py_file, kernel.boros_root if kernel else "."),
-                                "size_bytes": size,
-                                "likely_stub": True
-                            })
+                        skill_targets.append({
+                            "skill": skill_name,
+                            "file": os.path.relpath(py_file, kernel.boros_root if kernel else "."),
+                            "size_bytes": size,
+                            "likely_stub": size < 150
+                        })
 
-    # Sort by size (smallest = most stub-like)
-    skill_targets.sort(key=lambda x: x["size_bytes"])
+    # Improve targeting logic (tunnel vision fix)
+    recent_targets = set()
+    records_dir = os.path.join(boros_dir, "memory", "evolution_records")
+    if os.path.isdir(records_dir):
+        for rec in glob.glob(os.path.join(records_dir, "prop-*.json")):
+            try:
+                with open(rec) as f:
+                    prop = json.load(f)
+                    recent_targets.add(prop.get("target_file", ""))
+            except:
+                pass
+
+    for target in skill_targets:
+        file_path = target["file"]
+        # Priority score (lower is better)
+        score = target["size_bytes"] / 1000.0  # Base score from size
+        if any(rt and file_path.endswith(rt) for rt in recent_targets):
+            score += 50.0  # Heavy penalty for recently targeted files
+        target["priority_score"] = score
+
+    # Sort by priority score
+    skill_targets.sort(key=lambda x: x["priority_score"])
+    
+    import random
+    # Select from bottom 20% to force mutation diversity
+    candidates = skill_targets[:max(5, len(skill_targets) // 5)]
+    random.shuffle(candidates)
 
     return {
         "status": "ok",
         "high_water_marks": high_water,
         "latest_scores": latest_scores,
         "history_entries": len(history),
-        "stub_functions": skill_targets[:10],
+        "stub_functions": candidates[:10],
         "total_stubs": len(skill_targets),
-        "recommendation": f"Found {len(skill_targets)} stub functions. Start with the smallest."
+        "recommendation": f"Found {len(skill_targets)} candidate files. Target one of the identified files to diversify evolutionary scope."
     }

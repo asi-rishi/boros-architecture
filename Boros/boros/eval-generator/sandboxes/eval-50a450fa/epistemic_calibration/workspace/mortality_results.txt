@@ -1,0 +1,2 @@
+Control Mortality Rate: 0.0992
+Treatment Mortality Rate: 0.0845

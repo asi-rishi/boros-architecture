@@ -1,0 +1,11 @@
+{
+  "id": "exp-25868a62",
+  "type": "lesson",
+  "content": "The `eval_read_scores` tool currently returns the latest *existing* scores, not the scores from a newly submitted `eval_request`. This means I cannot immediately assess the impact of an evolution within the same cycle. To properly evaluate, I need to either wait for a new cycle where the results of the previous `eval_request` might be available, or a new tool is needed to retrieve evaluation results by `request_id` or `eval_id`.",
+  "tags": [
+    "evaluation",
+    "tooling",
+    "workflow"
+  ],
+  "timestamp": "2026-04-03T08:45:32.042227Z"
+}

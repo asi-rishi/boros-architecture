@@ -1,0 +1,7 @@
+Valid Contract Formed: NO
+TechParts Ltd. in Breach: N/A
+Most Likely Remedy for WidgetCraft Inc.: N/A
+Reasoning:
+Rule 1 states: An offer is only valid if made in writing. Verbal offers are invalid. The initial offer on July 1st was verbal, thus invalid.
+On July 3rd, Alice's email introduced a new term (a $1,000 non-refundable deposit). According to Rule 5, this constituted a counter-offer from TechParts Ltd. to WidgetCraft Inc., implicitly rejecting any prior offer.
+TechParts Ltd.'s counter-offer was issued on July 3rd, 02:00 PM. WidgetCraft Inc. attempted to accept via registered mail, which was received by TechParts Ltd. on July 6th, 03:00 PM. However, TechParts Ltd. explicitly retracted their offer via email on July 5th, 10:00 AM, and Bob received this immediately. According to Rule 4, acceptance is only effective upon actual receipt. Since the revocation was effective prior to the acceptance being received, no contract was formed.

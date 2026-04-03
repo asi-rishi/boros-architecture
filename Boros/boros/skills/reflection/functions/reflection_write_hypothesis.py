@@ -14,4 +14,5 @@ def reflection_write_hypothesis(params: dict, kernel=None) -> dict:
     os.makedirs(os.path.join(boros_dir, "session"), exist_ok=True)
     with open(os.path.join(boros_dir, "session", "hypothesis.json"), "w") as f:
         json.dump(hyp, f, indent=2)
+
     return {"status": "ok", "hypothesis_id": hyp_id}

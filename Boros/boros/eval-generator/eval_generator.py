@@ -67,24 +67,39 @@ class EvalGenerator:
         except:
             return "Write a python script to output.txt that adds two numbers."
 
-    def _grade_sandbox(self, transcript, category_id):
-        if not self.llm: return 0.5
+    def _grade_sandbox(self, transcript, category_id, workspace_dir):
+        if not self.llm: 
+            return {"score": 0.5, "quality_reason": "No LLM adapter loaded", "outcome_details": "N/A"}
+        
+        # Check actual files in workspace to provide outcome details
+        if workspace_dir and os.path.exists(workspace_dir):
+            file_list = os.listdir(workspace_dir)
+            files_str = f"Files created: {', '.join(file_list)}" if file_list else "No files created."
+        else:
+            files_str = "No workspace details found."
+
         cat = self.world_model["categories"].get(category_id, {})
         level_4 = cat.get("rubric", {}).get("level_4", "Excellent")
         prompt = (f"Review this sandbox transcript for the category '{category_id}'.\n\n"
                   f"Level 4 criteria: {level_4}\n\nTranscript:\n{transcript}\n\n"
-                  f"Score the performance from 0.0 to 1.0. Output ONLY a valid JSON object: {{\"score\": 0.85, \"reason\": \"...\"}}")
+                  f"Workspace evidence: {files_str}\n\n"
+                  f"Provide actionable structural feedback. Did the agent output real code? Did it finish the task? "
+                  f"Score from 0.0 to 1.0. Output ONLY a valid JSON object: {{\"score\": <float between 0.0 and 1.0>, \"quality_reason\": \"...\", \"outcome_details\": \"...\"}}")
         try:
             res = self.llm.complete([{"role": "user", "content": prompt}])
             text = "".join(b.get("text", "") for b in res.get("content", []) if b.get("type") == "text")
             import re
-            match = re.search(r'\{[^}]+\}', text)
+            match = re.search(r'\{[^}]+\}', text, re.DOTALL)
             if match:
                 data = json.loads(match.group())
-                return float(data.get("score", 0.5))
+                return {
+                    "score": float(data.get("score", 0.5)),
+                    "quality_reason": data.get("quality_reason", "No reason given"),
+                    "outcome_details": data.get("outcome_details", files_str)
+                }
         except:
             pass
-        return 0.5
+        return {"score": 0.5, "quality_reason": "Grading failed", "outcome_details": files_str}
 
     def _process_request(self, req_path):
         try:
@@ -159,8 +174,16 @@ class EvalGenerator:
                             transcript += f"Error: {loop_e}\n"
                             break
 
-                score = self._grade_sandbox(transcript, cat_id)
-                scores[cat_id] = {"outcome_score": score, "quality_score": score, "outcome_weight": 0.5, "quality_weight": 0.5}
+                score_data = self._grade_sandbox(transcript, cat_id, workspace_dir)
+                score = score_data["score"]
+                scores[cat_id] = {
+                    "outcome_score": score, 
+                    "quality_score": score,
+                    "outcome_weight": 0.5, 
+                    "quality_weight": 0.5,
+                    "quality_reason": score_data["quality_reason"],
+                    "outcome_details": score_data["outcome_details"]
+                }
                 total_score += score
                 
             shutil.rmtree(sandbox_dir, ignore_errors=True)

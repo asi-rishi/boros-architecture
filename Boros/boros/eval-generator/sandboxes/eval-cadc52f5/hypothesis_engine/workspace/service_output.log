@@ -1,0 +1,148 @@
+2026-04-03 14:47:57,997 - INFO - --- Service Starting ---
+2026-04-03 14:47:57,997 - INFO - [1] Processing request type: normal
+2026-04-03 14:47:58,051 - INFO - [1] Status: 200 OK. Simulated Memory: 0.00 MB
+2026-04-03 14:47:58,052 - INFO - [2] Processing request type: report
+2026-04-03 14:47:58,097 - INFO - [2] Status: 200 OK. Simulated Memory: 0.00 MB
+2026-04-03 14:47:58,097 - INFO - [3] Processing request type: heavy_report
+2026-04-03 14:47:58,122 - INFO - [3] Status: 200 OK. Simulated Memory: 1.00 MB
+2026-04-03 14:47:58,123 - INFO - [4] Processing request type: heavy_report
+2026-04-03 14:47:58,149 - INFO - [4] Status: 200 OK. Simulated Memory: 2.00 MB
+2026-04-03 14:47:58,149 - INFO - [5] Processing request type: normal
+2026-04-03 14:47:58,181 - INFO - [5] Status: 200 OK. Simulated Memory: 2.00 MB
+2026-04-03 14:47:58,182 - INFO - [6] Processing request type: analytics
+2026-04-03 14:47:58,215 - INFO - [6] Status: 200 OK. Simulated Memory: 2.00 MB
+2026-04-03 14:47:58,215 - INFO - [7] Processing request type: normal
+2026-04-03 14:47:58,252 - INFO - [7] Status: 200 OK. Simulated Memory: 2.00 MB
+2026-04-03 14:47:58,252 - INFO - [8] Processing request type: normal
+2026-04-03 14:47:58,299 - INFO - [8] Status: 200 OK. Simulated Memory: 2.00 MB
+2026-04-03 14:47:58,300 - INFO - [9] Processing request type: normal
+2026-04-03 14:47:58,328 - INFO - [9] Status: 200 OK. Simulated Memory: 2.00 MB
+2026-04-03 14:47:58,328 - INFO - [10] Processing request type: report
+2026-04-03 14:47:58,364 - INFO - [10] Status: 200 OK. Simulated Memory: 2.00 MB
+2026-04-03 14:47:58,364 - INFO - [11] Processing request type: heavy_report
+2026-04-03 14:47:58,408 - INFO - [11] Status: 200 OK. Simulated Memory: 3.00 MB
+2026-04-03 14:47:58,408 - INFO - [12] Processing request type: heavy_report
+2026-04-03 14:47:58,461 - INFO - [12] Status: 200 OK. Simulated Memory: 4.00 MB
+2026-04-03 14:47:58,461 - INFO - [13] Processing request type: report
+2026-04-03 14:47:58,485 - INFO - [13] Status: 200 OK. Simulated Memory: 4.00 MB
+2026-04-03 14:47:58,485 - INFO - [14] Processing request type: report
+2026-04-03 14:47:58,539 - INFO - [14] Status: 200 OK. Simulated Memory: 4.00 MB
+2026-04-03 14:47:58,539 - INFO - [15] Processing request type: report
+2026-04-03 14:47:58,588 - INFO - [15] Status: 200 OK. Simulated Memory: 4.00 MB
+2026-04-03 14:47:58,588 - INFO - [16] Processing request type: heavy_report
+2026-04-03 14:47:58,645 - INFO - [16] Status: 200 OK. Simulated Memory: 5.00 MB
+2026-04-03 14:47:58,646 - INFO - [17] Processing request type: normal
+2026-04-03 14:47:58,658 - INFO - [17] Status: 200 OK. Simulated Memory: 5.00 MB
+2026-04-03 14:47:58,659 - INFO - [18] Processing request type: normal
+2026-04-03 14:47:58,679 - INFO - [18] Status: 200 OK. Simulated Memory: 5.00 MB
+2026-04-03 14:47:58,680 - INFO - [19] Processing request type: normal
+2026-04-03 14:47:58,724 - INFO - [19] Status: 200 OK. Simulated Memory: 5.00 MB
+2026-04-03 14:47:58,724 - INFO - [20] Processing request type: report
+2026-04-03 14:47:58,745 - INFO - [20] Status: 200 OK. Simulated Memory: 5.00 MB
+2026-04-03 14:47:58,746 - INFO - [21] Processing request type: report
+2026-04-03 14:47:58,769 - INFO - [21] Status: 200 OK. Simulated Memory: 5.00 MB
+2026-04-03 14:47:58,770 - INFO - [22] Processing request type: heavy_report
+2026-04-03 14:47:58,817 - INFO - [22] Status: 200 OK. Simulated Memory: 6.00 MB
+2026-04-03 14:47:58,817 - INFO - [23] Processing request type: normal
+2026-04-03 14:47:58,853 - INFO - [23] Status: 200 OK. Simulated Memory: 6.00 MB
+2026-04-03 14:47:58,853 - INFO - [24] Processing request type: analytics
+2026-04-03 14:47:58,880 - INFO - [24] Status: 200 OK. Simulated Memory: 6.00 MB
+2026-04-03 14:47:58,880 - INFO - [25] Processing request type: heavy_report
+2026-04-03 14:47:58,936 - INFO - [25] Status: 200 OK. Simulated Memory: 7.00 MB
+2026-04-03 14:47:58,936 - INFO - [26] Processing request type: normal
+2026-04-03 14:47:58,969 - INFO - [26] Status: 200 OK. Simulated Memory: 7.00 MB
+2026-04-03 14:47:58,969 - INFO - [27] Processing request type: heavy_report
+2026-04-03 14:47:59,027 - INFO - [27] Status: 200 OK. Simulated Memory: 8.00 MB
+2026-04-03 14:47:59,028 - INFO - [28] Processing request type: analytics
+2026-04-03 14:47:59,057 - INFO - [28] Status: 200 OK. Simulated Memory: 8.00 MB
+2026-04-03 14:47:59,057 - INFO - [29] Processing request type: heavy_report
+2026-04-03 14:47:59,110 - INFO - [29] Status: 200 OK. Simulated Memory: 9.00 MB
+2026-04-03 14:47:59,110 - INFO - [30] Processing request type: normal
+2026-04-03 14:47:59,145 - INFO - [30] Status: 200 OK. Simulated Memory: 9.00 MB
+2026-04-03 14:47:59,145 - INFO - [31] Processing request type: heavy_report
+2026-04-03 14:47:59,162 - ERROR - [31] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 10.00 MB
+2026-04-03 14:47:59,162 - INFO - [32] Processing request type: analytics
+2026-04-03 14:47:59,201 - ERROR - [32] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 10.00 MB
+2026-04-03 14:47:59,202 - INFO - [33] Processing request type: normal
+2026-04-03 14:47:59,238 - ERROR - [33] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 10.00 MB
+2026-04-03 14:47:59,238 - INFO - [34] Processing request type: heavy_report
+2026-04-03 14:47:59,293 - ERROR - [34] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 11.00 MB
+2026-04-03 14:47:59,293 - INFO - [35] Processing request type: heavy_report
+2026-04-03 14:47:59,333 - ERROR - [35] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 12.00 MB
+2026-04-03 14:47:59,333 - INFO - [36] Processing request type: heavy_report
+2026-04-03 14:47:59,349 - ERROR - [36] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 13.00 MB
+2026-04-03 14:47:59,349 - INFO - [37] Processing request type: normal
+2026-04-03 14:47:59,408 - ERROR - [37] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 13.00 MB
+2026-04-03 14:47:59,408 - INFO - [38] Processing request type: report
+2026-04-03 14:47:59,457 - ERROR - [38] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 13.00 MB
+2026-04-03 14:47:59,457 - INFO - [39] Processing request type: analytics
+2026-04-03 14:47:59,493 - ERROR - [39] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 13.00 MB
+2026-04-03 14:47:59,493 - INFO - [40] Processing request type: normal
+2026-04-03 14:47:59,541 - ERROR - [40] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 13.00 MB
+2026-04-03 14:47:59,541 - INFO - [41] Processing request type: analytics
+2026-04-03 14:47:59,579 - ERROR - [41] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 13.00 MB
+2026-04-03 14:47:59,579 - INFO - [42] Processing request type: heavy_report
+2026-04-03 14:47:59,629 - ERROR - [42] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 14.00 MB
+2026-04-03 14:47:59,629 - INFO - [43] Processing request type: report
+2026-04-03 14:47:59,684 - ERROR - [43] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 14.00 MB
+2026-04-03 14:47:59,684 - INFO - [44] Processing request type: analytics
+2026-04-03 14:47:59,742 - ERROR - [44] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 14.00 MB
+2026-04-03 14:47:59,742 - INFO - [45] Processing request type: heavy_report
+2026-04-03 14:47:59,787 - ERROR - [45] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 15.00 MB
+2026-04-03 14:47:59,788 - INFO - [46] Processing request type: analytics
+2026-04-03 14:47:59,838 - ERROR - [46] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 15.00 MB
+2026-04-03 14:47:59,838 - INFO - [47] Processing request type: report
+2026-04-03 14:47:59,869 - ERROR - [47] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 15.00 MB
+2026-04-03 14:47:59,869 - INFO - [48] Processing request type: normal
+2026-04-03 14:47:59,924 - ERROR - [48] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 15.00 MB
+2026-04-03 14:47:59,925 - INFO - [49] Processing request type: analytics
+2026-04-03 14:47:59,979 - ERROR - [49] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 15.00 MB
+2026-04-03 14:47:59,979 - INFO - [50] Processing request type: analytics
+2026-04-03 14:48:00,031 - ERROR - [50] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 15.00 MB
+2026-04-03 14:48:00,031 - INFO - [51] Processing request type: analytics
+2026-04-03 14:48:00,081 - ERROR - [51] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 15.00 MB
+2026-04-03 14:48:00,081 - INFO - [52] Processing request type: heavy_report
+2026-04-03 14:48:00,125 - ERROR - [52] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 16.00 MB
+2026-04-03 14:48:00,125 - INFO - [53] Processing request type: report
+2026-04-03 14:48:00,138 - ERROR - [53] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 16.00 MB
+2026-04-03 14:48:00,138 - INFO - [54] Processing request type: normal
+2026-04-03 14:48:00,179 - ERROR - [54] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 16.00 MB
+2026-04-03 14:48:00,179 - INFO - [55] Processing request type: normal
+2026-04-03 14:48:00,216 - ERROR - [55] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 16.00 MB
+2026-04-03 14:48:00,216 - INFO - [56] Processing request type: report
+2026-04-03 14:48:00,228 - ERROR - [56] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 16.00 MB
+2026-04-03 14:48:00,228 - INFO - [57] Processing request type: heavy_report
+2026-04-03 14:48:00,249 - ERROR - [57] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 17.00 MB
+2026-04-03 14:48:00,249 - INFO - [58] Processing request type: analytics
+2026-04-03 14:48:00,287 - ERROR - [58] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 17.00 MB
+2026-04-03 14:48:00,287 - INFO - [59] Processing request type: normal
+2026-04-03 14:48:00,320 - ERROR - [59] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 17.00 MB
+2026-04-03 14:48:00,320 - INFO - [60] Processing request type: normal
+2026-04-03 14:48:00,363 - ERROR - [60] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 17.00 MB
+2026-04-03 14:48:00,363 - INFO - [61] Processing request type: analytics
+2026-04-03 14:48:00,394 - ERROR - [61] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 17.00 MB
+2026-04-03 14:48:00,394 - INFO - [62] Processing request type: report
+2026-04-03 14:48:00,432 - ERROR - [62] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 17.00 MB
+2026-04-03 14:48:00,432 - INFO - [63] Processing request type: report
+2026-04-03 14:48:00,450 - ERROR - [63] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 17.00 MB
+2026-04-03 14:48:00,450 - INFO - [64] Processing request type: normal
+2026-04-03 14:48:00,466 - ERROR - [64] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 17.00 MB
+2026-04-03 14:48:00,467 - INFO - [65] Processing request type: heavy_report
+2026-04-03 14:48:00,519 - ERROR - [65] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 18.00 MB
+2026-04-03 14:48:00,519 - INFO - [66] Processing request type: normal
+2026-04-03 14:48:00,549 - ERROR - [66] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 18.00 MB
+2026-04-03 14:48:00,549 - INFO - [67] Processing request type: heavy_report
+2026-04-03 14:48:00,586 - ERROR - [67] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 19.00 MB
+2026-04-03 14:48:00,586 - INFO - [68] Processing request type: report
+2026-04-03 14:48:00,634 - ERROR - [68] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 19.00 MB
+2026-04-03 14:48:00,634 - INFO - [69] Processing request type: report
+2026-04-03 14:48:00,652 - ERROR - [69] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 19.00 MB
+2026-04-03 14:48:00,652 - INFO - [70] Processing request type: normal
+2026-04-03 14:48:00,710 - ERROR - [70] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 19.00 MB
+2026-04-03 14:48:00,710 - INFO - [71] Processing request type: report
+2026-04-03 14:48:00,733 - ERROR - [71] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 19.00 MB
+2026-04-03 14:48:00,733 - INFO - [72] Processing request type: analytics
+2026-04-03 14:48:00,774 - ERROR - [72] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 19.00 MB
+2026-04-03 14:48:00,774 - INFO - [73] Processing request type: normal
+2026-04-03 14:48:00,828 - ERROR - [73] Status: 500 Internal Server Error - Simulated memory exhaustion!. Simulated Memory: 19.00 MB
+2026-04-03 14:48:00,829 - INFO - [74] Processing request type: normal

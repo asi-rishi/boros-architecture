@@ -1,0 +1,20 @@
+{
+  "offer": [
+    {"id": "OFF_001", "name": "Offer Expiry", "description": "An offer must explicitly state its expiry. If not stated, it expires 48 hours after being made.", "conditions": "EXPLICIT_EXPIRY_MISSING", "action": "DEFAULT_EXPIRY_48H"},
+    {"id": "OFF_002", "name": "Offer Revocation", "description": "An offer can be revoked at any time before acceptance, but revocation must be communicated through the same channel as the offer or a more direct channel.", "conditions": "REVOCATION_BEFORE_ACCEPTANCE", "action": "VALID_REVOCATION_CHANNEL_MATCH"}
+  ],
+  "acceptance": [
+    {"id": "ACC_001", "name": "Acceptance Method", "description": "Acceptance must be communicated in writing (email or physical letter) or via a video conference call. Verbal acceptance in person or via phone call is invalid.", "conditions": "ACCEPTANCE_METHOD_INVALID", "action": "INVALIDATE_ACCEPTANCE"},
+    {"id": "ACC_002", "name": "Mirror Image Rule", "description": "Acceptance must mirror the offer exactly. Any deviation constitutes a counter-offer, not an acceptance.", "conditions": "DEVIATION_FROM_OFFER", "action": "TREAT_AS_COUNTER_OFFER"}
+  ],
+  "consideration": [
+    {"id": "CON_001", "name": "Valuable Consideration", "description": "Consideration must be explicitly monetary and have a value greater than $100. Past consideration is never valid.", "conditions": "NON_MONETARY_OR_LOW_VALUE_OR_PAST", "action": "INVALIDATE_CONSIDERATION"}
+  ],
+  "breach": [
+    {"id": "BRE_001", "name": "Material Breach Definition", "description": "Any failure to perform a term of the contract is considered a material breach, unless the contract explicitly states it is a minor term.", "conditions": "FAILURE_TO_PERFORM_TERM", "action": "CLASSIFY_AS_MATERIAL_BREACH"}
+  ],
+  "remedies": [
+    {"id": "REM_001", "name": "Damages Cap", "description": "Monetary damages for breach of contract are capped at 1.25 times the original contract value.", "conditions": "CALCULATED_DAMAGES_EXCEED_CAP", "action": "APPLY_DAMAGES_CAP"},
+    {"id": "REM_002", "name": "Specific Performance", "description": "Specific performance is never an available remedy under any circumstances.", "conditions": "SPECIFIC_PERFORMANCE_REQUESTED", "action": "DENY_SPECIFIC_PERFORMANCE"}
+  ]
+}

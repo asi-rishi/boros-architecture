@@ -1,0 +1,14 @@
+admin_diana,doc_a_private,read,True
+admin_diana,doc_b_private,delete,True
+guest_eve,doc_a_public,read,True
+guest_eve,doc_a_private,read,False
+guest_eve,doc_a_owned_by_public_profile,read,True
+guest_eve,doc_a_public,write,False
+alice,doc_a_private,read,True
+alice,doc_a_private,write,False
+bob,doc_a_private,write,True
+charlie,doc_b_private,read,True
+charlie,doc_a_private,read,False
+bob,doc_c_cross_org_public,read,False
+unknown_user,doc_a_private,read,False
+alice,unknown_doc,read,False

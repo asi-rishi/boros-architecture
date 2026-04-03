@@ -241,6 +241,8 @@ class AgentLoop:
     def run_continuous(self, should_pause=None, on_cycle_complete=None):
         """Run evolution cycles until paused."""
         cycle_num = 0
+        fail_count = 0
+        import random
         while True:
             if should_pause and should_pause():
                 self.log("[LOOP] Pause requested.")
@@ -255,10 +257,16 @@ class AgentLoop:
                 tc = self.run_cycle()
                 if on_cycle_complete:
                     on_cycle_complete(cycle_num, tc)
+                fail_count = 0  # Reset backoff on success
             except Exception as e:
                 self.log(f"[ERROR] Cycle {cycle_num} failed: {e}")
                 self.log(traceback.format_exc())
-                time.sleep(30)  # Cooldown extended to allow 429 quota recovery
+                fail_count += 1
+                wait_time = min(300, 30 * (2 ** (fail_count - 1)))
+                jitter = random.uniform(0, 5)
+                total_wait = wait_time + jitter
+                self.log(f"[RATE_LIMIT] API limit hit. Exponential backoff for {total_wait:.1f}s (Fail #{fail_count})")
+                time.sleep(total_wait)
 
     # ────────────────────────────────────────────
     # Cycle Prompt
@@ -285,13 +293,13 @@ class AgentLoop:
             "13. If approved: `evolve_apply` to commit and trigger dynamic HOT-RELOAD.\n"
             "14. `loop_advance_stage` — transition to EVAL\n\n"
             "## STAGE 3: EVAL\n"
-            "15. `eval_request` — request sandbox evaluation\n"
-            "16. `eval_read_scores` — read results\n"
+            "15. `eval_request` — request sandbox evaluation (returns a request_id)\n"
+            "16. `eval_read_scores` — read results (YOU MUST pass the returned request_id into eval_id so it waits for the result!)\n"
             "17. `eval_check_regression` — compare to high-water marks\n"
             "18. `eval_update_high_water` — update if improved\n"
             "19. `memory_commit_archival` — save learnings\n"
             "20. `loop_end_cycle` — finalize\n\n"
-            "IMPORTANT: Make REAL code improvements. Read actual files, write actual diffs. "
+            "IMPORTANT: Make REAL code improvements or Skill File instruction improvements. Read actual files, write actual diffs. "
             "Do not mock or simulate. Every tool call should produce real side-effects.\n"
             "Focus on improving the weakest-scoring skill functions — make them more capable."
         )
