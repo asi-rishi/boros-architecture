@@ -72,11 +72,27 @@ class EvalGenerator:
             return {"score": 0.5, "quality_reason": "No LLM adapter loaded", "outcome_details": "N/A"}
         
         # Check actual files in workspace to provide outcome details
+        file_list = []
         if workspace_dir and os.path.exists(workspace_dir):
-            file_list = os.listdir(workspace_dir)
+            file_list = [f for f in os.listdir(workspace_dir) if os.path.isfile(os.path.join(workspace_dir, f))]
             files_str = f"Files created: {', '.join(file_list)}" if file_list else "No files created."
         else:
             files_str = "No workspace details found."
+
+        has_error = "Error:" in transcript
+        no_files = len(file_list) == 0
+
+        # Objective Constraints: Immediately fail if there are no files or if there are tool errors
+        if has_error or no_files:
+            reason = "Task execution failed objectively. "
+            if has_error: reason += "Transcript contains fatal tool errors. "
+            if no_files: reason += "Agent failed to produce any artifacts or code files in the workspace. "
+            reason += "Score algorithmically capped at 0.0."
+            return {
+                "score": 0.0,
+                "quality_reason": reason,
+                "outcome_details": files_str
+            }
 
         cat = self.world_model["categories"].get(category_id, {})
         level_4 = cat.get("rubric", {}).get("level_4", "Excellent")
@@ -84,7 +100,8 @@ class EvalGenerator:
                   f"Level 4 criteria: {level_4}\n\nTranscript:\n{transcript}\n\n"
                   f"Workspace evidence: {files_str}\n\n"
                   f"Provide actionable structural feedback. Did the agent output real code? Did it finish the task? "
-                  f"Score from 0.0 to 1.0. Output ONLY a valid JSON object: {{\"score\": <float between 0.0 and 1.0>, \"quality_reason\": \"...\", \"outcome_details\": \"...\"}}")
+                  f"STRICT INSTRUCTION: Provide a score from 0.0 to 1.0. If the output does not fully solve the task or lacks meaningful programmatic elements, penalize heavily. "
+                  f"Output ONLY a valid JSON object: {{\"score\": <float between 0.0 and 1.0>, \"quality_reason\": \"...\", \"outcome_details\": \"...\"}}")
         try:
             res = self.llm.complete([{"role": "user", "content": prompt}])
             text = "".join(b.get("text", "") for b in res.get("content", []) if b.get("type") == "text")

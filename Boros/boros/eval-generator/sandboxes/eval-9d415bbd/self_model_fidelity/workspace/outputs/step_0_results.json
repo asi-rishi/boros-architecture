@@ -1,0 +1,54 @@
+{
+  "step_number": 0,
+  "current_token_ids_in_window": [
+    101
+  ],
+  "Q_matrix": [
+    [
+      9.0,
+      10.0,
+      11.0,
+      12.0
+    ]
+  ],
+  "K_matrix": [
+    [
+      0.1,
+      0.2,
+      0.30000000000000004,
+      0.4
+    ]
+  ],
+  "V_matrix": [
+    [
+      1.0,
+      2.0,
+      3.0,
+      4.0
+    ]
+  ],
+  "attention_scores_unscaled": [
+    [
+      11.000000000000002
+    ]
+  ],
+  "softmax_scores": [
+    [
+      1.0
+    ]
+  ],
+  "full_attention_output": [
+    [
+      1.0,
+      2.0,
+      3.0,
+      4.0
+    ]
+  ],
+  "new_token_output_vector": [
+    1.0,
+    2.0,
+    3.0,
+    4.0
+  ]
+}

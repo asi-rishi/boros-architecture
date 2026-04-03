@@ -22,9 +22,9 @@ A universal analytical scanner Boros calls explicitly to pass massive unstructur
 → {"status": "ok", "synthesized_insight": str}
 ```
 
-### reflection_write_hypothesis(target_category, exact_change, rationale)
+### reflection_write_hypothesis(rationale, expected_improvement, target_skill, trace_analysis)
 
-A highly structured, data-backed formal thesis that Boros MUST formally write whenever it seeks to alter its own biological code or capabilities. 
+A highly structured, data-backed formal thesis that Boros MUST formally write whenever it seeks to alter its own biological code or capabilities. This function now accepts `trace_analysis` which includes `weakest_category` and `recommendation` from the `reflection_analyze_trace` to ensure hypotheses are data-driven.
 
 ```
 → {"status": "ok", "hypothesis_id": str}

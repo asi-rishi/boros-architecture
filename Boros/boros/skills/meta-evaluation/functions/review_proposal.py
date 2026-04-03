@@ -25,7 +25,10 @@ def review_proposal(params: dict, kernel=None) -> dict:
                 f"1. Correctness: Will this code run without errors?\n"
                 f"2. Improvement: Does it genuinely improve the function?\n"
                 f"3. Safety: Could it break other parts of the system?\n"
-                f"4. Python syntax: Is it valid Python?\n\n"
+                f"4. Python syntax: Is it valid Python?\n"
+                f"5. Algorithmic Depth: Does this change modify control flow, algorithms, or structural capability?\n\n"
+                f"CRITICAL REJECTION CRITERIA:\n"
+                f"You MUST return 'reject' if the proposal ONLY changes string phrasing, comment text, prompts, or docstrings without adding meaningful programmatic execution logic. Cosmetic or trivial refactors MUST be rejected. Boros is trying to evolve its logic, not its writing style.\n\n"
                 f"Respond with EXACTLY one JSON object:\n"
                 f'{{"verdict": "apply"|"reject"|"modify", "reason": "...", "confidence": 0.0-1.0}}'
             )

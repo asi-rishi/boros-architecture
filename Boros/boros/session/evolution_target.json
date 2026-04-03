@@ -1,6 +1,0 @@
-{
-  "target_skill": "reflection",
-  "category": "",
-  "approach": "Modify reflection_write_hypothesis to store full hypothesis content in memory.",
-  "timestamp": "2026-04-03T09:01:25.203709Z"
-}

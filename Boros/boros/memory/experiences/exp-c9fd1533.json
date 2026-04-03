@@ -1,0 +1,13 @@
+{
+  "id": "exp-c9fd1533",
+  "type": "lesson",
+  "content": "Attempted to improve 'self_model_fidelity' by enhancing `reflection_write_hypothesis` to include trace analysis details. However, this led to a regression in 'reasoning_architecture'. The proposed change to `reflection_write_hypothesis` was intended to make hypotheses more data-driven, but the subsequent evaluation showed a decline in the `reasoning_architecture` score. This suggests that while the intention was good, the implementation or the subsequent generation of an evaluation task did not align to produce a better outcome. The system was rolled back to the previous snapshot.",
+  "tags": [
+    "regression",
+    "reflection",
+    "self_model_fidelity",
+    "reasoning_architecture",
+    "rollback"
+  ],
+  "timestamp": "2026-04-03T09:44:03.263962Z"
+}

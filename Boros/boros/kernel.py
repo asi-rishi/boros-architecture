@@ -67,16 +67,20 @@ class BorosKernel:
             for d in dirs:
                 (boros_dir / d).mkdir(parents=True, exist_ok=True)
                 
-            # Derive evals/categories.json from manifest (world_model logic proxy)
+            # Derive evals/categories.json from world_model.json
             categories = {}
-            if "world_model" in self.manifest and "scoring" in self.manifest["world_model"]:
-                for rubric in self.manifest["world_model"]["scoring"]["rubrics"]:
-                    cat_id = rubric.get("category")
-                    if cat_id:
+            wm_path = boros_dir / "world_model.json"
+            if wm_path.exists():
+                try:
+                    with open(wm_path) as f:
+                        wm = json.load(f)
+                    for cat_id, cat_data in wm.get("categories", {}).items():
                         categories[cat_id] = {
-                            "name": cat_id.replace("_", " ").title(),
-                            "description": rubric.get("thresholds", {}).get("0.8", "")
+                            "name": cat_data.get("name", cat_id.replace("_", " ").title()),
+                            "description": cat_data.get("description", "")
                         }
+                except Exception as e:
+                    print(f"Error loading world_model.json: {e}")
             
             with open(boros_dir / "evals" / "categories.json", "w") as f:
                 json.dump(categories, f, indent=2)
@@ -87,6 +91,43 @@ class BorosKernel:
             hw_dir.mkdir(parents=True, exist_ok=True)
             with open(hw_dir / "high_water_marks.json", "w") as f:
                 json.dump(high_water, f, indent=2)
+            
+        else:
+            # Repair existing broken state if categories.json is empty
+            cats_path = boros_dir / "evals" / "categories.json"
+            if cats_path.exists():
+                try:
+                    with open(cats_path) as f:
+                        cats = json.load(f)
+                    if not cats:
+                        # Broken state detected, repair it
+                        wm_path = boros_dir / "world_model.json"
+                        if wm_path.exists():
+                            with open(wm_path) as f:
+                                wm = json.load(f)
+                            categories = {cid: {"name": cd.get("name", cid), "description": cd.get("description", "")} for cid, cd in wm.get("categories", {}).items()}
+                            with open(cats_path, "w") as f:
+                                json.dump(categories, f, indent=2)
+                            
+                            # Also completely repair high_water marks
+                            hw_dir = boros_dir / "skills" / "eval-bridge" / "state"
+                            hw_path = hw_dir / "high_water_marks.json"
+                            hw_dir.mkdir(parents=True, exist_ok=True)
+                            
+                            existing_hw = {}
+                            if hw_path.exists():
+                                with open(hw_path) as f:
+                                    existing_hw = json.load(f)
+                            
+                            for cat in categories.keys():
+                                if cat not in existing_hw:
+                                    existing_hw[cat] = 0.0
+                            
+                            with open(hw_path, "w") as f:
+                                json.dump(existing_hw, f, indent=2)
+                            print("[Kernel] Repaired broken categories.json state.")
+                except Exception:
+                    pass
                 
             # Initialize loop_state.json
             loop_state_dir = boros_dir / "skills" / "loop-orchestrator" / "state"

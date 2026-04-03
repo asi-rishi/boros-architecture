@@ -1,0 +1,2 @@
+Mean_Mortality_Effect: 0.0530
+95_Percent_CI: (0.0175, 0.0929)

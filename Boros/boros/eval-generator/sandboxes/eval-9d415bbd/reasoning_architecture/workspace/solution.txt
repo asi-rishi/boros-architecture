@@ -1,0 +1,7 @@
+Farmer takes Goat from W to E.
+Farmer takes alone from E to W.
+Farmer takes Wolf from W to E.
+Farmer takes Goat from E to W.
+Farmer takes Cabbage from W to E.
+Farmer takes alone from E to W.
+Farmer takes Goat from W to E.

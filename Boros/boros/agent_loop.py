@@ -139,97 +139,103 @@ class AgentLoop:
         cycle_start = time.time()
 
         self.log("[CYCLE] Starting evolution cycle...")
+        status = "completed"
 
-        while tool_call_count < self.max_tool_calls:
-            # Time limit check
-            elapsed_min = (time.time() - cycle_start) / 60
-            if elapsed_min > self.max_cycle_minutes:
-                self.log(f"[CYCLE] Time limit ({self.max_cycle_minutes}m) reached.")
-                break
+        try:
+            while tool_call_count < self.max_tool_calls:
+                # Time limit check
+                elapsed_min = (time.time() - cycle_start) / 60
+                if elapsed_min > self.max_cycle_minutes:
+                    self.log(f"[CYCLE] Time limit ({self.max_cycle_minutes}m) reached.")
+                    status = "timeout"
+                    break
 
-            # Call LLM
-            try:
-                response = self.kernel.evolution_llm.complete(messages, tools, system)
-            except Exception as e:
-                self.log(f"[ERROR] LLM call failed: {e}")
-                self.log(traceback.format_exc())
-                raise  # Let the continuous loop catch this and trigger the cooldown sleep
-
-            content = response.get("content", [])
-            stop_reason = response.get("stop_reason", "end_turn")
-            usage = response.get("usage", {})
-
-            # Log text output
-            for block in content:
-                if block.get("type") == "text" and block.get("text"):
-                    self.log(f"[BOROS] {block['text'][:800]}")
-
-            # Log usage
-            if usage:
-                self.log(f"[TOKENS] in={usage.get('input_tokens', '?')} out={usage.get('output_tokens', '?')}")
-
-            # Append assistant response
-            messages.append({"role": "assistant", "content": content})
-
-            # Natural stop
-            if stop_reason == "end_turn":
-                self.log("[CYCLE] LLM ended turn naturally.")
-                break
-
-            # Dispatch tool calls
-            tool_results = []
-            for block in content:
-                if block.get("type") == "tool_use":
-                    name = block["name"]
-                    inp = block.get("input", {})
-                    tid = block["id"]
-
-                    if name == "evolve_propose":
-                        desc = inp.get("description", "")
-                        self.log(f"\n========================================")
-                        self.log(f"📝 [PROPOSAL CREATED]: {desc}")
-                        self.log(f"========================================\n")
-                        self.log(f"[TOOL] → {name}({json.dumps(inp, default=str)[:300]})")
-                    elif name == "tool_file_edit_diff":
-                        self.log(f"\n========================================")
-                        self.log(f"⚙️ [CODE MUTATION] Targeting: {inp.get('target_file')}")
-                        for i, chunk in enumerate(inp.get("replacement_chunks", [])):
-                            self.log(f"\n--- Chunk {i+1} ---")
-                            target_lines = chunk.get("target_content", "").split("\n")
-                            replace_lines = chunk.get("replacement_content", "").split("\n")
-                            for line in target_lines: self.log(f"[-] {line}")
-                            for line in replace_lines: self.log(f"[+] {line}")
-                        self.log(f"========================================\n")
-                        self.log(f"[TOOL] → {name}(...)")
-                    else:
-                        self.log(f"[TOOL] → {name}({json.dumps(inp, default=str)[:300]})")
-
-                    result = self.dispatch_tool(name, inp)
-                    result_str = json.dumps(result, default=str)
-                    
-                    if name in ("evolve_propose", "tool_file_edit_diff"):
-                        self.log(f"[TOOL] ← {result_str}") # print full result for these
-                    else:
-                        self.log(f"[TOOL] ← {result_str[:400]}")
-
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": tid,
-                        "content": result_str
-                    })
-                    tool_call_count += 1
-
-            if not tool_results:
-                self.log("[CYCLE] No tool calls found. Ending.")
-                break
-
-            messages.append({"role": "user", "content": tool_results})
-
-        # Log cycle end to file
-        log_file = self.boros_root / "boros" / "logs" / "cycles.log"
-        log_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(log_file, "a") as f:
-            f.write(f"Cycle completed. tool_calls={tool_call_count}\n")
+                # Call LLM
+                try:
+                    response = self.kernel.evolution_llm.complete(messages, tools, system)
+                except Exception as e:
+                    self.log(f"[ERROR] LLM call failed: {e}")
+                    self.log(traceback.format_exc())
+                    status = "error"
+                    raise  # Let the continuous loop catch this and trigger the cooldown sleep
+    
+                content = response.get("content", [])
+                stop_reason = response.get("stop_reason", "end_turn")
+                usage = response.get("usage", {})
+    
+                # Log text output
+                for block in content:
+                    if block.get("type") == "text" and block.get("text"):
+                        self.log(f"[BOROS] {block['text'][:800]}")
+    
+                # Log usage
+                if usage:
+                    self.log(f"[TOKENS] in={usage.get('input_tokens', '?')} out={usage.get('output_tokens', '?')}")
+    
+                # Append assistant response
+                messages.append({"role": "assistant", "content": content})
+    
+                # Natural stop
+                if stop_reason == "end_turn":
+                    self.log("[CYCLE] LLM ended turn naturally.")
+                    break
+    
+                # Dispatch tool calls
+                tool_results = []
+                for block in content:
+                    if block.get("type") == "tool_use":
+                        name = block["name"]
+                        inp = block.get("input", {})
+                        tid = block["id"]
+    
+                        if name == "evolve_propose":
+                            desc = inp.get("description", "")
+                            self.log(f"\n========================================")
+                            self.log(f"📝 [PROPOSAL CREATED]: {desc}")
+                            self.log(f"========================================\n")
+                            self.log(f"[TOOL] → {name}({json.dumps(inp, default=str)[:300]})")
+                        elif name == "tool_file_edit_diff":
+                            self.log(f"\n========================================")
+                            self.log(f"⚙️ [CODE MUTATION] Targeting: {inp.get('target_file')}")
+                            for i, chunk in enumerate(inp.get("replacement_chunks", [])):
+                                self.log(f"\n--- Chunk {i+1} ---")
+                                target_lines = chunk.get("target_content", "").split("\n")
+                                replace_lines = chunk.get("replacement_content", "").split("\n")
+                                for line in target_lines: self.log(f"[-] {line}")
+                                for line in replace_lines: self.log(f"[+] {line}")
+                            self.log(f"========================================\n")
+                            self.log(f"[TOOL] → {name}(...)")
+                        else:
+                            self.log(f"[TOOL] → {name}({json.dumps(inp, default=str)[:300]})")
+    
+                        result = self.dispatch_tool(name, inp)
+                        result_str = json.dumps(result, default=str)
+                        
+                        if name in ("evolve_propose", "tool_file_edit_diff"):
+                            self.log(f"[TOOL] ← {result_str}") # print full result for these
+                        else:
+                            self.log(f"[TOOL] ← {result_str[:400]}")
+    
+                        tool_results.append({
+                            "type": "tool_result",
+                            "tool_use_id": tid,
+                            "content": result_str
+                        })
+                        tool_call_count += 1
+    
+                if not tool_results:
+                    self.log("[CYCLE] No tool calls found. Ending.")
+                    break
+    
+                messages.append({"role": "user", "content": tool_results})
+    
+        finally:
+            # Log cycle end to file
+            log_file = self.boros_root / "boros" / "logs" / "cycles.log"
+            log_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(log_file, "a") as f:
+                f.write(f"Cycle ended. status={status} tool_calls={tool_call_count}\n")
+                f.flush()
 
         self.log(f"[CYCLE] Finished. {tool_call_count} tool calls.")
         return tool_call_count
@@ -297,8 +303,9 @@ class AgentLoop:
             "16. `eval_read_scores` — read results (YOU MUST pass the returned request_id into eval_id so it waits for the result!)\n"
             "17. `eval_check_regression` — compare to high-water marks\n"
             "18. `eval_update_high_water` — update if improved\n"
-            "19. `memory_commit_archival` — save learnings\n"
-            "20. `loop_end_cycle` — finalize\n\n"
+            "19. `identity_update` — (IF IMPROVED) update your self_narrative and capabilities to reflect your new mastery\n"
+            "20. `memory_commit_archival` — save learnings\n"
+            "21. `loop_end_cycle` — finalize\n\n"
             "IMPORTANT: Make REAL code improvements or Skill File instruction improvements. Read actual files, write actual diffs. "
             "Do not mock or simulate. Every tool call should produce real side-effects.\n"
             "Focus on improving the weakest-scoring skill functions — make them more capable."

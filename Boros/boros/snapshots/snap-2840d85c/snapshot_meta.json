@@ -1,0 +1,11 @@
+{
+  "snapshot_id": "snap-2840d85c",
+  "skill_name": "skill-router",
+  "timestamp": "2026-04-03T09:44:30.169029Z",
+  "files": [
+    "router_get_budget.py",
+    "router_get_tools.py",
+    "router_manifest.py",
+    "__init__.py"
+  ]
+}

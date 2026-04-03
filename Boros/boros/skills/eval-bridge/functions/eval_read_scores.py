@@ -6,6 +6,23 @@ def eval_read_scores(params: dict, kernel=None) -> dict:
     eval_id = params.get("eval_id", "")
     results_dir = os.path.join(boros_dir, "eval-generator", "shared", "results")
 
+    def _append_to_history(result_data):
+        score_hist = os.path.join(boros_dir, "memory", "score_history.jsonl")
+        os.makedirs(os.path.dirname(score_hist), exist_ok=True)
+        # Check if already the last entry
+        if os.path.exists(score_hist):
+            try:
+                with open(score_hist, "r") as f:
+                    lines = [ln for ln in f if ln.strip()]
+                    if lines:
+                        last_entry = json.loads(lines[-1])
+                        if last_entry.get("eval_id") == result_data.get("eval_id"):
+                            return # Already appended
+            except Exception:
+                pass
+        with open(score_hist, "a") as f:
+            f.write(json.dumps(result_data) + "\n")
+
     if eval_id:
         # Read specific eval (wait up to 10 minutes for slow evals)
         for attempt in range(120):
@@ -15,6 +32,7 @@ def eval_read_scores(params: dict, kernel=None) -> dict:
                         with open(rf) as f:
                             result = json.load(f)
                             if result.get("request_id") == eval_id:
+                                _append_to_history(result)
                                 return {"status": "ok", "scores": result.get("scores", {}), "composite": result.get("composite", 0), "result": result}
                     except Exception:
                         pass
@@ -23,6 +41,7 @@ def eval_read_scores(params: dict, kernel=None) -> dict:
                 if os.path.exists(result_file):
                     with open(result_file) as f:
                         result = json.load(f)
+                    _append_to_history(result)
                     return {"status": "ok", "scores": result.get("scores", {}), "composite": result.get("composite", 0), "result": result}
             time.sleep(5)
         return {"status": "error", "message": f"Timeout waiting for evaluation results for {eval_id}"}
@@ -41,11 +60,20 @@ def eval_read_scores(params: dict, kernel=None) -> dict:
                         pass
                 if results:
                     latest = results[0]
-                    # Append to score history
+                    # Check if we already have this in history
                     score_hist = os.path.join(boros_dir, "memory", "score_history.jsonl")
-                    os.makedirs(os.path.dirname(score_hist), exist_ok=True)
-                    with open(score_hist, "a") as f:
-                        f.write(json.dumps(latest) + "\n")
+                    if os.path.exists(score_hist):
+                        try:
+                            with open(score_hist, "r") as f:
+                                lines = [ln for ln in f if ln.strip()]
+                                if lines:
+                                    last_entry = json.loads(lines[-1])
+                                    if last_entry.get("eval_id") == latest.get("eval_id"):
+                                        return {"status": "error", "message": "No new evaluation results found. The latest result is already in the score history. Did you forget to provide eval_id?"}
+                        except Exception:
+                            pass
+                    
+                    _append_to_history(latest)
                     return {
                         "status": "ok",
                         "scores": latest.get("scores", {}),

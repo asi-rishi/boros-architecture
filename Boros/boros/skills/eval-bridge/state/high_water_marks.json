@@ -1,3 +1,12 @@
 {
-  "reasoning_architecture": 0.85
+  "reasoning_architecture": 0.85,
+  "self_model_fidelity": 0.0,
+  "epistemic_calibration": 0.0,
+  "complexity_navigation": 0.0,
+  "domain_snap": 0.0,
+  "hypothesis_engine": 0.0,
+  "generative_depth": 0.0,
+  "execution_reliability": 0.0,
+  "adversarial_robustness": 0.0,
+  "coherence_under_load": 0.0
 }
