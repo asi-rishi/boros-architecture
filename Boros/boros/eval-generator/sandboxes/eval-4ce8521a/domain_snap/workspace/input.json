@@ -1,0 +1,32 @@
+
+{
+  "rules": [
+    {"id": "R1", "description": "An offer must clearly state intent to be bound, specific terms, and be communicated directly to the offeree."},
+    {"id": "R2", "description": "An offer remains open for 72 hours from the time of communication unless explicitly revoked sooner or a specific expiry is stated within the offer itself."},
+    {"id": "R3", "description": "Acceptance is effective only upon explicit written confirmation received by the offeror. Silence or performance alone does not constitute acceptance."},
+    {"id": "R4", "description": "Any modification to an offer, however minor, constitutes a counter-offer and terminates the original offer."},
+    {"id": "R5", "description": "Consideration must be reciprocal and tangible. Sentimental value, promises of future good behavior, or past actions do not qualify."},
+    {"id": "R6", "description": "Consideration must have a stated minimum value of $100."},
+    {"id": "R7", "description": "A breach occurs if a party fails to perform any material term of the contract as agreed, or if anticipatory repudiation is explicitly stated in writing."},
+    {"id": "R8", "description": "Failure to perform due to unforeseen 'Act of God' events (e.g., natural disaster, war declared by government) is excused if a 'force majeure' clause is absent."},
+    {"id": "R9", "description": "Damages for breach are limited to direct monetary losses actually incurred and specifically proven, capped at the lesser of 150% of the contract value or $10,000. Consequential damages are never awarded."},
+    {"id": "R10", "description": "Specific performance is only available for contracts involving unique intellectual property or real estate, and only if monetary damages are demonstrably inadequate."}
+  ],
+  "scenario": {
+    "parties": {
+      "client": "Digital Dreams Inc.",
+      "other_party": "Apex Widgets Co."
+    },
+    "events": [
+      {"timestamp": "2023-01-01T10:00:00Z", "type": "offer", "from": "Digital Dreams Inc.", "to": "Apex Widgets Co.", "terms": {"item": "100 custom widgets", "price_per_unit": 150, "total_value": 15000, "delivery_date": "2023-02-15"}, "expires_by": "2023-01-05T23:59:59Z"},
+      {"timestamp": "2023-01-03T14:30:00Z", "type": "response", "from": "Apex Widgets Co.", "to": "Digital Dreams Inc.", "content": "We accept your offer for 100 widgets at $150 each, but delivery will be by 2023-02-20."},
+      {"timestamp": "2023-01-10T09:00:00Z", "type": "action", "from": "Apex Widgets Co.", "description": "Started manufacturing widgets based on the offer."},
+      {"timestamp": "2023-01-12T11:00:00Z", "type": "revocation", "from": "Digital Dreams Inc.", "to": "Apex Widgets Co.", "content": "We are no longer interested in the widgets."}
+    ],
+    "dispute_claim": {
+      "party_claiming_breach": "Apex Widgets Co.",
+      "damages_sought": 5000,
+      "reason": "DDI breached contract by canceling after AWC started manufacturing."
+    }
+  }
+}

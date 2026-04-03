@@ -1,0 +1,8 @@
+0: (0, 0, 0, 0) (Carried: Initial State)
+1: (1, 0, 1, 0) (Carried: Goat)
+2: (0, 0, 1, 0) (Carried: None)
+3: (1, 1, 1, 0) (Carried: Wolf)
+4: (0, 1, 0, 0) (Carried: Goat)
+5: (1, 1, 0, 1) (Carried: Cabbage)
+6: (0, 1, 0, 1) (Carried: None)
+7: (1, 1, 1, 1) (Carried: Goat)

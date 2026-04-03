@@ -1,0 +1,9 @@
+{
+  "snapshot_id": "snap-7a81057d",
+  "skill_name": "forge",
+  "timestamp": "2026-04-03T10:09:34.486563Z",
+  "files": [
+    "forge_apply_diff_and_validate.py",
+    "__init__.py"
+  ]
+}

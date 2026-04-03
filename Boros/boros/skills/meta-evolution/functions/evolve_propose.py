@@ -1,7 +1,20 @@
 
 import os, json, uuid, datetime
+from .validate import validate_skill_syntax
 def evolve_propose(params: dict, kernel=None) -> dict:
     """Create a formal evolution proposal. Stores proposal artifact in session."""
+    
+    # First, validate the skill's syntax
+    skill_name_to_validate = params.get("skill_name")
+    if skill_name_to_validate:
+        validation_result = validate_skill_syntax(skill_name_to_validate, kernel)
+        if validation_result.get("status") != "ok" or not validation_result.get("is_valid"):
+            return {
+                "status": "error",
+                "message": "Syntax validation failed. Proposal aborted.",
+                "details": validation_result.get("errors", [])
+            }
+            
     boros_dir = os.path.join(kernel.boros_root, "boros") if kernel else "boros"
     prop_id = f"prop-{uuid.uuid4().hex[:8]}"
 

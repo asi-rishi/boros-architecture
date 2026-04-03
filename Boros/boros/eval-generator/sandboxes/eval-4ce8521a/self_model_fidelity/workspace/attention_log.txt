@@ -1,0 +1,55 @@
+Processing Token 0
+Incoming Token (Query): [1.0, 0.0]
+Context Window Before Update: []
+Oldest Token Removed: None
+Context Window After Update: [[1.0, 0.0]]
+Keys/Values for Attention (Current Window): [[1.0, 0.0]]
+Raw Attention Scores (Dot Products): [1.0]
+Scaled Attention Scores (divided by sqrt(dim)): [0.7071067811865475]
+Softmax Attention Weights: [1.0]
+Attended Output Vector: [1.0, 0.0]
+---
+Processing Token 1
+Incoming Token (Query): [0.0, 1.0]
+Context Window Before Update: [[1.0, 0.0]]
+Oldest Token Removed: None
+Context Window After Update: [[1.0, 0.0], [0.0, 1.0]]
+Keys/Values for Attention (Current Window): [[1.0, 0.0], [0.0, 1.0]]
+Raw Attention Scores (Dot Products): [0.0, 1.0]
+Scaled Attention Scores (divided by sqrt(dim)): [0.0, 0.7071067811865475]
+Softmax Attention Weights: [0.3302384506733431, 0.6697615493266569]
+Attended Output Vector: [0.3302384506733431, 0.6697615493266569]
+---
+Processing Token 2
+Incoming Token (Query): [1.0, 1.0]
+Context Window Before Update: [[1.0, 0.0], [0.0, 1.0]]
+Oldest Token Removed: None
+Context Window After Update: [[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]]
+Keys/Values for Attention (Current Window): [[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]]
+Raw Attention Scores (Dot Products): [1.0, 1.0, 2.0]
+Scaled Attention Scores (divided by sqrt(dim)): [0.7071067811865475, 0.7071067811865475, 1.414213562373095]
+Softmax Attention Weights: [0.24825507825772306, 0.24825507825772306, 0.5034898434845538]
+Attended Output Vector: [0.7517449217422769, 0.7517449217422769]
+---
+Processing Token 3
+Incoming Token (Query): [0.5, 0.5]
+Context Window Before Update: [[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]]
+Oldest Token Removed: [1.0, 0.0]
+Context Window After Update: [[0.0, 1.0], [1.0, 1.0], [0.5, 0.5]]
+Keys/Values for Attention (Current Window): [[0.0, 1.0], [1.0, 1.0], [0.5, 0.5]]
+Raw Attention Scores (Dot Products): [0.5, 1.0, 0.5]
+Scaled Attention Scores (divided by sqrt(dim)): [0.35355339059327373, 0.7071067811865475, 0.35355339059327373]
+Softmax Attention Weights: [0.2920459231442186, 0.41590815371156264, 0.2920459231442186]
+Attended Output Vector: [0.5619311152836719, 0.8539770384278906]
+---
+Processing Token 4
+Incoming Token (Query): [2.0, 0.0]
+Context Window Before Update: [[0.0, 1.0], [1.0, 1.0], [0.5, 0.5]]
+Oldest Token Removed: [0.0, 1.0]
+Context Window After Update: [[1.0, 1.0], [0.5, 0.5], [2.0, 0.0]]
+Keys/Values for Attention (Current Window): [[1.0, 1.0], [0.5, 0.5], [2.0, 0.0]]
+Raw Attention Scores (Dot Products): [2.0, 1.0, 4.0]
+Scaled Attention Scores (divided by sqrt(dim)): [1.414213562373095, 0.7071067811865475, 2.82842712474619]
+Softmax Attention Weights: [0.1783701547276046, 0.08794873877550644, 0.733681106496889]
+Attended Output Vector: [1.6897067371091359, 0.22234452411535782]
+---

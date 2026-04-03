@@ -1,0 +1,6 @@
+[
+    {"name": "AlphaCorp", "is_successful": true, "has_strong_culture": true},
+    {"name": "BetaInc", "is_successful": false, "has_strong_culture": true},
+    {"name": "GammaLLC", "is_successful": true, "has_strong_culture": false},
+    {"name": "DeltaCo", "is_successful": false, "has_strong_culture": false}
+]

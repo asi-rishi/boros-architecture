@@ -1,0 +1,12 @@
+{
+  "snapshot_id": "snap-8e1df7c3",
+  "skill_name": "tool-use",
+  "timestamp": "2026-04-03T10:10:02.758920Z",
+  "files": [
+    "tool_file_edit_diff.py",
+    "tool_terminal.py",
+    "tool_terminal_input.py",
+    "tool_terminal_kill.py",
+    "__init__.py"
+  ]
+}

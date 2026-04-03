@@ -1,0 +1,20 @@
+[
+    {
+        "source": "Drug",
+        "target": "Biomarker X",
+        "effect_type": "reduces",
+        "confidence_qualitative": "low"
+    },
+    {
+        "source": "Biomarker X",
+        "target": "Disease Progression",
+        "effect_type": "correlates_positively",
+        "confidence_qualitative": "mixed"
+    },
+    {
+        "source": "Disease Progression",
+        "target": "Mortality",
+        "effect_type": "correlates_positively",
+        "confidence_qualitative": "moderate"
+    }
+]

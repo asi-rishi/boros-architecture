@@ -1,0 +1,7 @@
+TransactionID,Date,Amount,Currency,Description,CustomerID,Error
+T004,2023-04-10,-10.00,USD,Refund,CUST125,Amount not positive
+T005,2023-02-30,75.00,EUR,Travel Expense,CUST126,Invalid Date format or value
+T006,2023-05-01,150.00,AUD,Payment,CUST127,Invalid Currency
+T008,,25.00,USD,Empty ID Test,CUST129,Invalid Date format or value
+T009,2023-06-01,0.00,USD,Zero Amount,CUST130,Amount not positive
+T010,2023-07-04,abc,USD,Invalid Amount,CUST131,Amount not positive

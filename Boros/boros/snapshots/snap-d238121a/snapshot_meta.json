@@ -1,0 +1,17 @@
+{
+  "snapshot_id": "snap-d238121a",
+  "skill_name": "meta-evolution",
+  "timestamp": "2026-04-03T10:21:55.653764Z",
+  "files": [
+    "evolve_apply.py",
+    "evolve_create_skill.py",
+    "evolve_history.py",
+    "evolve_modify_loop.py",
+    "evolve_orient.py",
+    "evolve_propose.py",
+    "evolve_rollback.py",
+    "evolve_set_target.py",
+    "validate.py",
+    "__init__.py"
+  ]
+}

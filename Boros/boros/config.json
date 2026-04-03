@@ -16,7 +16,7 @@
   "providers": {
     "evolution_api": {
       "provider": "gemini",
-      "model": "gemini-2.5-flash",
+      "model": "gemini-2.5-pro",
       "max_tokens": 8192
     },
     "meta_eval_api": {
